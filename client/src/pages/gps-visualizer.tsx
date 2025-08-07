@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Satellite, Info } from "lucide-react";
+import dimoLogo from "@assets/Logo_DIMOBuild_black_1754591736408.png";
 import GpsMap from "@/components/gps-map";
 import GpsControls from "@/components/gps-controls";
 import GpsStatus from "@/components/gps-status";
@@ -70,12 +71,16 @@ export default function GpsVisualizer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center" data-testid="logo">
-                <Satellite className="text-white" size={16} />
+              <div className="h-8 flex items-center" data-testid="logo">
+                <img 
+                  src={dimoLogo} 
+                  alt="DIMO Logo" 
+                  className="h-8 w-auto object-contain"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-slate-900" data-testid="title">
-                  GPS Signal Visualizer
+                  DIMO GPS Signal Visualizer
                 </h1>
                 <p className="text-sm text-slate-500" data-testid="subtitle">
                   Real-time GPS accuracy mapping
