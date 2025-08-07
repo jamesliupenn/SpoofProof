@@ -70,32 +70,39 @@ export default function GpsVisualizer() {
       <header className="bg-white shadow-sm border-b border-slate-200" data-testid="header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 flex items-center" data-testid="logo">
+            <div className="flex items-center space-x-2 lg:space-x-3">
+              <div className="h-6 lg:h-8 flex items-center" data-testid="logo">
                 <img 
                   src={dimoLogo} 
                   alt="DIMO Logo" 
-                  className="h-8 w-auto object-contain"
+                  className="h-6 lg:h-8 w-auto object-contain"
                 />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-slate-900" data-testid="title">
-                  DIMO GPS Signal Visualizer
+                <h1 className="text-lg lg:text-xl font-semibold text-slate-900" data-testid="title">
+                  <span className="hidden sm:inline">DIMO GPS Signal Visualizer</span>
+                  <span className="sm:hidden">DIMO GPS</span>
                 </h1>
-                <p className="text-sm text-slate-500" data-testid="subtitle">
+                <p className="text-xs lg:text-sm text-slate-500 hidden sm:block" data-testid="subtitle">
                   Real-time GPS accuracy mapping
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100" data-testid="header-status">
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              <div className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-1 rounded-full bg-slate-100" data-testid="header-status">
                 <div className={`w-2 h-2 rounded-full ${
                   gpsStatus.status === 'good-gps' ? 'bg-green-500' :
                   gpsStatus.status === 'poor-gps' ? 'bg-yellow-500' : 'bg-red-500'
                 }`} />
-                <span className="text-sm font-medium text-slate-600">
-                  {gpsStatus.status === 'good-gps' ? 'Good GPS' :
-                   gpsStatus.status === 'poor-gps' ? 'Poor GPS' : 'No GPS'}
+                <span className="text-xs lg:text-sm font-medium text-slate-600">
+                  <span className="hidden sm:inline">
+                    {gpsStatus.status === 'good-gps' ? 'Good GPS' :
+                     gpsStatus.status === 'poor-gps' ? 'Poor GPS' : 'No GPS'}
+                  </span>
+                  <span className="sm:hidden">
+                    {gpsStatus.status === 'good-gps' ? 'Good' :
+                     gpsStatus.status === 'poor-gps' ? 'Poor' : 'None'}
+                  </span>
                 </span>
               </div>
             </div>
@@ -105,41 +112,46 @@ export default function GpsVisualizer() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-8rem)]">
+        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6 min-h-[calc(100vh-8rem)]">
           
           {/* Control Panel */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
             <GpsControls 
               gpsData={gpsData}
               onGpsDataChange={handleGpsDataChange}
               testScenarios={testScenarios}
             />
-            <GpsStatus 
-              gpsStatus={gpsStatus}
-              gpsData={gpsData}
-            />
+            <div className="hidden lg:block">
+              <GpsStatus 
+                gpsStatus={gpsStatus}
+                gpsData={gpsData}
+              />
+            </div>
           </div>
 
           {/* Map Container */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden">
-              <div className="h-12 border-b border-slate-200 flex items-center justify-between px-6">
-                <h3 className="font-semibold text-slate-900 flex items-center" data-testid="map-title">
+          <div className="lg:col-span-3 order-1 lg:order-2">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[50vh] lg:h-full overflow-hidden">
+              <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 lg:px-6">
+                <h3 className="font-semibold text-slate-900 flex items-center text-sm lg:text-base" data-testid="map-title">
                   <Info className="text-blue-600 mr-2" size={16} />
                   GPS Signal Visualization
                 </h3>
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center space-x-2" data-testid="legend-good">
-                    <div className="w-3 h-3 bg-green-500 rounded-full" />
-                    <span className="text-slate-600">Good Signal</span>
+                <div className="hidden sm:flex items-center space-x-2 lg:space-x-4 text-xs lg:text-sm">
+                  <div className="flex items-center space-x-1 lg:space-x-2" data-testid="legend-good">
+                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-green-500 rounded-full" />
+                    <span className="text-slate-600 hidden lg:inline">Good Signal</span>
+                    <span className="text-slate-600 lg:hidden">Good</span>
                   </div>
-                  <div className="flex items-center space-x-2" data-testid="legend-poor">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-                    <span className="text-slate-600">Poor Signal</span>
+                  <div className="flex items-center space-x-1 lg:space-x-2" data-testid="legend-poor">
+                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-yellow-500 rounded-full" />
+                    <span className="text-slate-600 hidden lg:inline">Poor Signal</span>
+                    <span className="text-slate-600 lg:hidden">Poor</span>
                   </div>
-                  <div className="flex items-center space-x-2" data-testid="legend-no-signal">
-                    <div className="w-3 h-3 bg-red-500 rounded-full" />
-                    <span className="text-slate-600">No Signal</span>
+                  <div className="flex items-center space-x-1 lg:space-x-2" data-testid="legend-no-signal">
+                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-red-500 rounded-full" />
+                    <span className="text-slate-600 hidden lg:inline">No Signal</span>
+                    <span className="text-slate-600 lg:hidden">None</span>
                   </div>
                 </div>
               </div>
@@ -152,6 +164,14 @@ export default function GpsVisualizer() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Mobile GPS Status - shown only on mobile */}
+          <div className="lg:hidden order-3">
+            <GpsStatus 
+              gpsStatus={gpsStatus}
+              gpsData={gpsData}
+            />
           </div>
         </div>
       </div>
