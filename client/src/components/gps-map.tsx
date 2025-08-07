@@ -37,7 +37,7 @@ export default function GpsMap({ gpsData, gpsStatus, lastKnownLocation }: GpsMap
     if (!mapRef.current || mapInstanceRef.current) return;
 
     // Initialize map
-    mapInstanceRef.current = L.map(mapRef.current).setView([40.7128, -74.0060], 13);
+    mapInstanceRef.current = L.map(mapRef.current).setView([40.7128, -74.0060], 16);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
