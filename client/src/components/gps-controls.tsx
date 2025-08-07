@@ -62,10 +62,12 @@ export default function GpsControls({ gpsData, onGpsDataChange, testScenarios }:
             <Input
               id="latitude"
               type="number"
-              step="any"
+              step="0.000001"
+              min="-90"
+              max="90"
               value={localGpsData.lat}
               onChange={(e) => handleInputChange('lat', e.target.value)}
-              placeholder="Enter latitude"
+              placeholder="Enter latitude (-90 to 90)"
               className="mt-1"
               data-testid="input-latitude"
             />
@@ -78,10 +80,12 @@ export default function GpsControls({ gpsData, onGpsDataChange, testScenarios }:
             <Input
               id="longitude"
               type="number"
-              step="any"
+              step="0.000001"
+              min="-180"
+              max="180"
               value={localGpsData.lng}
               onChange={(e) => handleInputChange('lng', e.target.value)}
-              placeholder="Enter longitude"
+              placeholder="Enter longitude (-180 to 180)"
               className="mt-1"
               data-testid="input-longitude"
             />
