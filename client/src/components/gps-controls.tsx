@@ -129,22 +129,31 @@ export default function GpsControls({ gpsData, onGpsDataChange, testScenarios }:
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {testScenarios.map((scenario, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              onClick={() => handleScenarioClick(scenario)}
-              className="w-full text-left p-3 h-auto hover:border-blue-300 hover:bg-blue-50 transition-all"
-              data-testid={`button-scenario-${index}`}
-            >
-              <div className="w-full">
-                <div className="font-medium text-slate-900">{scenario.description}</div>
-                <div className="text-sm text-slate-500">
-                  Lat: {scenario.lat}, Lng: {scenario.lng}, HDOP: {scenario.hdop}
+          {testScenarios.map((scenario, index) => {
+            const getScenarioEmoji = (description: string) => {
+              if (description.toLowerCase().includes('offline')) return '📵';
+              if (description.toLowerCase().includes('garage')) return '🏢';
+              if (description.toLowerCase().includes('road')) return '🛣️';
+              return '📍';
+            };
+            
+            return (
+              <Button
+                key={index}
+                variant="outline"
+                onClick={() => handleScenarioClick(scenario)}
+                className="w-full text-left p-3 h-auto hover:border-blue-300 hover:bg-blue-50 transition-all"
+                data-testid={`button-scenario-${index}`}
+              >
+                <div className="w-full">
+                  <div className="font-medium text-slate-900 flex items-center">
+                    <span className="mr-2">{getScenarioEmoji(scenario.description)}</span>
+                    {scenario.description}
+                  </div>
                 </div>
-              </div>
-            </Button>
-          ))}
+              </Button>
+            );
+          })}
         </CardContent>
       </Card>
     </>
