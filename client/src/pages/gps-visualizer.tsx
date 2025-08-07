@@ -26,7 +26,7 @@ interface TestScenario {
 
 function renderGPSStatus(lat: number, lng: number, hdop: number): GpsStatusResult {
   if (lat === 0 && lng === 0 && hdop === 0) {
-    return { status: 'no-gps', message: 'No GPS signal', showOnMap: false };
+    return { status: 'no-gps', message: 'No GPS signal', showOnMap: true };
   }
 
   if (hdop > 10) {
@@ -43,6 +43,11 @@ export default function GpsVisualizer() {
     hdop: 1.2
   });
 
+  const [lastKnownLocation, setLastKnownLocation] = useState<{ lat: number; lng: number }>({
+    lat: 45,
+    lng: -82
+  });
+
   const { data: testScenarios = [] } = useQuery<TestScenario[]>({
     queryKey: ['/api/gps/test-scenarios'],
   });
@@ -51,6 +56,11 @@ export default function GpsVisualizer() {
 
   const handleGpsDataChange = (newData: GpsData) => {
     setGpsData(newData);
+    
+    // Update last known location if we have valid GPS coordinates
+    if (newData.lat !== 0 || newData.lng !== 0) {
+      setLastKnownLocation({ lat: newData.lat, lng: newData.lng });
+    }
   };
 
   return (
@@ -133,6 +143,7 @@ export default function GpsVisualizer() {
                 <GpsMap 
                   gpsData={gpsData}
                   gpsStatus={gpsStatus}
+                  lastKnownLocation={lastKnownLocation}
                 />
               </div>
             </div>

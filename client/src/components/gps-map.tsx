@@ -24,9 +24,10 @@ interface GpsStatusResult {
 interface GpsMapProps {
   gpsData: GpsData;
   gpsStatus: GpsStatusResult;
+  lastKnownLocation: { lat: number; lng: number };
 }
 
-export default function GpsMap({ gpsData, gpsStatus }: GpsMapProps) {
+export default function GpsMap({ gpsData, gpsStatus, lastKnownLocation }: GpsMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -59,12 +60,12 @@ export default function GpsMap({ gpsData, gpsStatus }: GpsMapProps) {
       circleRef.current = null;
     }
 
-    // Don't show marker if GPS is offline
-    if (gpsStatus.showOnMap === false) {
-      return;
-    }
-
     const { lat, lng, hdop } = gpsData;
+    
+    // Use last known location if GPS is offline (0,0,0)
+    const displayLat = (lat === 0 && lng === 0 && hdop === 0) ? lastKnownLocation.lat : lat;
+    const displayLng = (lat === 0 && lng === 0 && hdop === 0) ? lastKnownLocation.lng : lng;
+    const isOffline = lat === 0 && lng === 0 && hdop === 0;
 
     // Determine marker color based on status
     const markerColor = gpsStatus.status === 'good-gps' ? '#22c55e' : 
@@ -78,22 +79,35 @@ export default function GpsMap({ gpsData, gpsStatus }: GpsMapProps) {
       iconAnchor: [10, 10]
     });
 
-    // Add marker
-    markerRef.current = L.marker([lat, lng], { icon: markerIcon }).addTo(map);
+    // Add marker at display location
+    markerRef.current = L.marker([displayLat, displayLng], { icon: markerIcon }).addTo(map);
 
-    // Calculate accuracy radius
-    const accuracyRadius = hdop > 10 ? hdop * 5 : Math.max(hdop * 2, 3);
+    // Only show accuracy circle if GPS is active
+    if (!isOffline) {
+      // Calculate accuracy radius
+      const accuracyRadius = hdop > 10 ? hdop * 5 : Math.max(hdop * 2, 3);
 
-    // Add accuracy circle
-    circleRef.current = L.circle([lat, lng], {
-      color: markerColor,
-      fillColor: markerColor,
-      fillOpacity: 0.1,
-      radius: accuracyRadius
-    }).addTo(map);
+      // Add accuracy circle
+      circleRef.current = L.circle([displayLat, displayLng], {
+        color: markerColor,
+        fillColor: markerColor,
+        fillOpacity: 0.1,
+        radius: accuracyRadius
+      }).addTo(map);
+    }
 
     // Add popup with details
-    markerRef.current.bindPopup(`
+    const popupContent = isOffline ? `
+      <div class="p-2">
+        <div class="font-semibold text-red-600">NO GPS</div>
+        <div class="text-sm text-gray-600">No GPS signal</div>
+        <div class="text-xs text-gray-500 mt-1">
+          Last known location:<br>
+          Lat: ${displayLat.toFixed(6)}<br>
+          Lng: ${displayLng.toFixed(6)}
+        </div>
+      </div>
+    ` : `
       <div class="p-2">
         <div class="font-semibold">${gpsStatus.status.replace('-', ' ').toUpperCase()}</div>
         <div class="text-sm text-gray-600">${gpsStatus.message}</div>
@@ -103,12 +117,14 @@ export default function GpsMap({ gpsData, gpsStatus }: GpsMapProps) {
           HDOP: ${hdop}
         </div>
       </div>
-    `);
+    `;
+    
+    markerRef.current.bindPopup(popupContent);
 
-    // Center map on new location
-    map.setView([lat, lng], map.getZoom());
+    // Center map on display location
+    map.setView([displayLat, displayLng], map.getZoom());
 
-  }, [gpsData, gpsStatus]);
+  }, [gpsData, gpsStatus, lastKnownLocation]);
 
   useEffect(() => {
     // Cleanup on unmount
