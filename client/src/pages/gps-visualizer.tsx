@@ -38,14 +38,14 @@ function renderGPSStatus(lat: number, lng: number, hdop: number): GpsStatusResul
 
 export default function GpsVisualizer() {
   const [gpsData, setGpsData] = useState<GpsData>({
-    lat: 45,
-    lng: -82,
+    lat: 40.7128,
+    lng: -74.0060,
     hdop: 1.2
   });
 
   const [lastKnownLocation, setLastKnownLocation] = useState<{ lat: number; lng: number }>({
-    lat: 45,
-    lng: -82
+    lat: 40.7128,
+    lng: -74.0060
   });
 
   const { data: testScenarios = [] } = useQuery<TestScenario[]>({
