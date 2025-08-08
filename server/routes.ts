@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertGpsDataSchema } from "@shared/schema";
 import { z } from "zod";
-import { dimoService } from "./dimo-service";
+import { dimoService } from "./dimo-wrapper";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GPS data routes

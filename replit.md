@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 - **Node.js**: JavaScript runtime environment
 - **PostgreSQL**: Database system (configured via Drizzle but not actively used)
 - **Neon Database**: Serverless PostgreSQL provider (connection configured)
+- **DIMO SDK**: Vehicle data integration with ES module compatibility wrapper
 
 ### Frontend Libraries  
 - **Radix UI**: Headless component primitives for accessible UI components
@@ -98,3 +99,8 @@ Preferred communication style: Simple, everyday language.
 - Fixed deployment configuration issues preventing production builds from serving static files correctly
 - Created production build script that properly handles file structure requirements
 - Verified host binding and port configuration for deployment compatibility
+- **ES Module Compatibility Fix (August 8, 2025)**: Applied comprehensive fixes for DIMO SDK deployment issues
+  - Created DIMO SDK wrapper (`server/dimo-wrapper.ts`) to handle problematic directory imports
+  - Updated esbuild configuration with proper external dependencies and bundling strategy
+  - Implemented graceful fallback for DIMO SDK import failures with proper error messaging
+  - Verified production build and server startup without ES module crashes

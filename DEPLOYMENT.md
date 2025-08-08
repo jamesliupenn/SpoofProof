@@ -22,6 +22,12 @@ This script will:
 
 ### Starting the Production Server
 
+#### Option 1: Using the startup script (Recommended)
+```bash
+./start-production.sh
+```
+
+#### Option 2: Manual startup
 ```bash
 NODE_ENV=production node dist/index.js
 ```
@@ -31,6 +37,9 @@ NODE_ENV=production node dist/index.js
 1. **Static File Serving**: Fixed the mismatch between build output (`dist/public`) and expected location (`server/public`)
 2. **Host Binding**: Server is configured to bind to `0.0.0.0:5000` for proper interface access
 3. **Production Mode**: The server correctly serves static files in production using the `serveStatic` function
+4. **ES Module Compatibility**: Created DIMO SDK wrapper to handle directory import issues
+5. **Custom Build Process**: Updated esbuild configuration with proper externals and bundling
+6. **Graceful Fallback**: DIMO SDK wrapper provides proper error handling and fallback behavior for production deployment
 
 ### Environment Variables
 - `PORT`: Server port (defaults to 5000)
