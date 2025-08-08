@@ -49,7 +49,7 @@ export default function DimoAuth() {
 
   return (
     <ShareVehiclesWithDimo
-      mode="popup"
+      mode="redirect"
       permissions="10111111"
       expirationDate={expirationDate}
       onSuccess={handleShareSuccess}
