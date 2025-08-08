@@ -1,8 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDimoAuthState } from "@dimo-network/login-with-dimo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Car, Calendar, Shield, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Car, Calendar, Shield, AlertTriangle, MapPin, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Vehicle {
   tokenId: number;
@@ -37,13 +39,44 @@ const fetchSharedVehicles = async (walletAddress: string): Promise<SharedVehicle
   return response.json();
 };
 
+const fetchVehicleLocation = async (tokenId: number) => {
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
 export default function UserVehicles() {
   const { isAuthenticated, walletAddress } = useDimoAuthState();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['/api/dimo/shared-vehicles', walletAddress],
     queryFn: () => fetchSharedVehicles(walletAddress!),
     enabled: isAuthenticated && !!walletAddress,
+  });
+
+  const locationMutation = useMutation({
+    mutationFn: fetchVehicleLocation,
+    onSuccess: (locationData) => {
+      toast({
+        title: "Location Updated",
+        description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)}`,
+      });
+      // Invalidate GPS data to trigger a refresh of the map
+      queryClient.invalidateQueries({ queryKey: ['/api/gps'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Location Fetch Failed",
+        description: error instanceof Error ? error.message : "Failed to fetch vehicle location",
+        variant: "destructive",
+      });
+    },
   });
 
   if (!isAuthenticated || !walletAddress) {
@@ -151,6 +184,23 @@ export default function UserVehicles() {
                   <Badge variant="secondary" data-testid={`vehicle-status-${vehicle.tokenId}`}>
                     Shared
                   </Badge>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => locationMutation.mutate(vehicle.tokenId)}
+                    disabled={locationMutation.isPending}
+                    data-testid={`fetch-location-${vehicle.tokenId}`}
+                  >
+                    {locationMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <MapPin className="h-4 w-4 mr-2" />
+                    )}
+                    {locationMutation.isPending ? 'Fetching...' : 'Get Location'}
+                  </Button>
                 </div>
 
                 {vehicle.sacds.nodes.length > 0 && (
