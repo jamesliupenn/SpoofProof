@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCachedDimoAuth } from "@/hooks/use-cached-auth";
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -76,9 +77,27 @@ export default function UserVehicles() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/dimo/vehicles", walletAddress],
-    queryFn: () => fetchUserVehicles(walletAddress!),
+    queryFn: () => {
+      console.log('Frontend: Making API call to fetch vehicles for wallet:', walletAddress);
+      return fetchUserVehicles(walletAddress!);
+    },
     enabled: isAuthenticated && !!walletAddress,
   });
+
+  // Log query state changes
+  useEffect(() => {
+    console.log('UserVehicles query state update:', { 
+      isAuthenticated, 
+      walletAddress, 
+      isLoading, 
+      error: error?.message,
+      data,
+      queryEnabled: isAuthenticated && !!walletAddress 
+    });
+  }, [isAuthenticated, walletAddress, isLoading, error, data]);
+  
+  // Also log the final authentication status for the user
+  console.log('UserVehicles render - Final auth state:', { isAuthenticated, walletAddress, isFromCache, vehicleCount: data?.vehicles?.length || 0 });
 
 
 
