@@ -24,8 +24,10 @@ interface DimoTelemetryData {
 export class DimoService {
   private isInitialized = false;
   private dimo: any = null;
+  private clientId: string;
 
   constructor() {
+    this.clientId = process.env.DIMO_CLIENT_ID || '';
     this.initializeSDK();
   }
 
@@ -54,6 +56,17 @@ export class DimoService {
                   console.warn('Mock DIMO: getVehicle called with params:', params);
                   return {
                     tokenId: params.tokenId,
+                    message: 'DIMO SDK unavailable - using mock data'
+                  };
+                },
+                async query(params: any) {
+                  console.warn('Mock DIMO: Identity GraphQL query called with params:', params);
+                  return {
+                    data: {
+                      vehicles: {
+                        nodes: []
+                      }
+                    },
                     message: 'DIMO SDK unavailable - using mock data'
                   };
                 }
@@ -176,6 +189,62 @@ export class DimoService {
     } catch (error) {
       console.error('Error fetching DIMO vehicle telemetry:', error);
       throw new Error('Failed to fetch vehicle telemetry from DIMO API. Please verify your credentials.');
+    }
+  }
+
+  async getUserSharedVehicles(walletAddress: string): Promise<any> {
+    if (!this.isInitialized || !this.dimo) {
+      throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
+    }
+
+    if (!this.clientId) {
+      throw new Error('DIMO_CLIENT_ID environment variable is required.');
+    }
+
+    try {
+      // GraphQL query to get vehicles shared with our client ID by the user's wallet
+      const query = `
+        {
+          vehicles(
+            filterBy: { 
+              privileged: "${this.clientId}", 
+              owner: "${walletAddress}" 
+            }
+            first: 100
+          ) {
+            nodes {
+              tokenId
+              definition {
+                make
+                model
+                year
+              }
+              sacds(first: 10) {
+                nodes {
+                  permissions
+                  grantee
+                  createdAt
+                  expiresAt
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      console.log('Querying DIMO Identity API for wallet:', walletAddress);
+      console.log('Using Client ID:', this.clientId);
+
+      const result = await this.dimo.identity.query({
+        query: query
+      });
+
+      console.log('DIMO Identity API response:', JSON.stringify(result, null, 2));
+      
+      return result?.data?.vehicles?.nodes || [];
+    } catch (error) {
+      console.error('Error fetching user shared vehicles from DIMO:', error);
+      throw new Error('Failed to fetch shared vehicles from DIMO Identity API. Please verify your credentials and ensure vehicles are shared with this app.');
     }
   }
 }

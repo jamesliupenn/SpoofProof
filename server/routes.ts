@@ -133,6 +133,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's shared vehicles from DIMO Identity API
+  app.get("/api/dimo/shared-vehicles", async (req, res) => {
+    try {
+      const { walletAddress } = req.query;
+      
+      if (!walletAddress) {
+        res.status(400).json({ message: "walletAddress query parameter is required" });
+        return;
+      }
+
+      console.log('Fetching shared vehicles for wallet:', walletAddress);
+      const sharedVehicles = await dimoService.getUserSharedVehicles(walletAddress as string);
+      
+      res.json({
+        walletAddress,
+        vehicles: sharedVehicles,
+        count: sharedVehicles.length
+      });
+    } catch (error) {
+      console.error('Error fetching shared vehicles:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to fetch shared vehicles from DIMO"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
