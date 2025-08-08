@@ -52,6 +52,8 @@ export default function DimoAuth() {
       mode="redirect"
       permissions="10111111"
       expirationDate={expirationDate}
+      unAuthenticatedLabel="Show My Vehicles"
+      authenticatedLabel="Manage My Vehicles"
       onSuccess={handleShareSuccess}
       onError={handleShareError}
     >
@@ -59,11 +61,11 @@ export default function DimoAuth() {
         variant="default" 
         size="sm" 
         className="flex items-center space-x-2"
-        data-testid="button-show-vehicle"
+        data-testid="button-share-vehicles"
       >
         <Car size={14} />
-        <span className="hidden sm:inline">Show My Vehicle</span>
-        <span className="sm:hidden">Vehicle</span>
+        <span className="hidden sm:inline">Share Vehicles</span>
+        <span className="sm:hidden">Share</span>
       </Button>
     </ShareVehiclesWithDimo>
   );
