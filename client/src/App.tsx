@@ -11,7 +11,7 @@ import GpsVisualizer from "@/pages/gps-visualizer";
 initializeDimoSDK({
   clientId: import.meta.env.VITE_DIMO_CLIENT_ID,
   redirectUri: import.meta.env.VITE_DIMO_REDIRECT_URI,
-  environment: "development"
+  environment: "production"
 });
 
 function Router() {
