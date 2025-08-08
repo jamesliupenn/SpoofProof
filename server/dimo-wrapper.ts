@@ -82,6 +82,45 @@ export class DimoService {
                     data: {},
                     message: 'DIMO SDK unavailable - using mock data'
                   };
+                },
+                async query(params: any) {
+                  console.warn('Mock DIMO: Telemetry GraphQL query called with params:', params);
+                  return {
+                    data: {
+                      signalsLatest: {
+                        lastSeen: new Date().toISOString(),
+                        currentLocationLatitude: { timestamp: new Date().toISOString(), value: 40.7128 },
+                        currentLocationLongitude: { timestamp: new Date().toISOString(), value: -74.0060 },
+                        dimoAftermarketHDOP: { timestamp: new Date().toISOString(), value: 1.5 }
+                      }
+                    },
+                    message: 'DIMO SDK unavailable - using mock data'
+                  };
+                }
+              };
+            }
+            
+            get auth() {
+              return {
+                async getDeveloperJwt(params: any) {
+                  console.warn('Mock DIMO: getDeveloperJwt called with params:', params);
+                  return {
+                    access_token: 'mock-dev-jwt-token',
+                    message: 'DIMO SDK unavailable - using mock data'
+                  };
+                }
+              };
+            }
+            
+            get tokenexchange() {
+              return {
+                async getVehicleJwt(params: any) {
+                  console.warn('Mock DIMO: getVehicleJwt called with params:', params);
+                  return {
+                    access_token: 'mock-vehicle-jwt-token',
+                    tokenId: params.tokenId,
+                    message: 'DIMO SDK unavailable - using mock data'
+                  };
                 }
               };
             }
@@ -133,36 +172,7 @@ export class DimoService {
     }
   }
 
-  async getVehicleLocation(vehicleId: string, userToken: string): Promise<any> {
-    if (!this.isInitialized || !this.dimo) {
-      throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
-    }
 
-    try {
-      const telemetryData = await this.dimo.telemetry.getLatest({
-        tokenId: parseInt(vehicleId),
-        signals: ['location.latitude', 'location.longitude', 'location.accuracy']
-      });
-
-      const latitude = telemetryData.data?.['location.latitude']?.value;
-      const longitude = telemetryData.data?.['location.longitude']?.value;
-      const accuracy = telemetryData.data?.['location.accuracy']?.value;
-
-      if (!latitude || !longitude) {
-        throw new Error('No location data available for this vehicle');
-      }
-
-      return {
-        lat: parseFloat(latitude),
-        lng: parseFloat(longitude),
-        hdop: accuracy ? parseFloat(accuracy) : 1.0,
-        timestamp: telemetryData.timestamp || new Date().toISOString()
-      };
-    } catch (error) {
-      console.error('Error fetching DIMO vehicle location:', error);
-      throw new Error('Failed to fetch vehicle location from DIMO API. Please verify your credentials.');
-    }
-  }
 
   async getVehicleTelemetry(vehicleId: string, signals: string[] = []): Promise<any> {
     if (!this.isInitialized || !this.dimo) {
@@ -245,6 +255,101 @@ export class DimoService {
     } catch (error) {
       console.error('Error fetching user shared vehicles from DIMO:', error);
       throw new Error('Failed to fetch shared vehicles from DIMO Identity API. Please verify your credentials and ensure vehicles are shared with this app.');
+    }
+  }
+
+  async getDeveloperJwt(): Promise<any> {
+    if (!this.isInitialized || !this.dimo) {
+      throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
+    }
+
+    const clientId = process.env.DIMO_CLIENT_ID;
+    const redirectUri = process.env.DIMO_REDIRECT_URI;
+    const privateKey = process.env.DIMO_API_KEY;
+
+    if (!clientId || !redirectUri || !privateKey) {
+      throw new Error('Missing required DIMO environment variables: DIMO_CLIENT_ID, DIMO_REDIRECT_URI, DIMO_API_KEY');
+    }
+
+    try {
+      console.log('Getting Developer JWT with Client ID:', clientId);
+      
+      const developerJwt = await this.dimo.auth.getDeveloperJwt({
+        client_id: clientId,
+        domain: redirectUri,
+        private_key: privateKey
+      });
+
+      console.log('Developer JWT obtained successfully');
+      return developerJwt;
+    } catch (error) {
+      console.error('Error getting Developer JWT:', error);
+      throw new Error('Failed to obtain Developer JWT from DIMO. Please verify your API credentials.');
+    }
+  }
+
+  async getVehicleJwt(developerJwt: any, tokenId: number): Promise<any> {
+    if (!this.isInitialized || !this.dimo) {
+      throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
+    }
+
+    try {
+      console.log('Getting Vehicle JWT for tokenId:', tokenId);
+      
+      const vehicleJwt = await this.dimo.tokenexchange.getVehicleJwt({
+        ...developerJwt,
+        tokenId: tokenId
+      });
+
+      console.log('Vehicle JWT obtained successfully for tokenId:', tokenId);
+      return vehicleJwt;
+    } catch (error) {
+      console.error('Error getting Vehicle JWT for tokenId', tokenId, ':', error);
+      throw new Error(`Failed to obtain Vehicle JWT for tokenId ${tokenId}. Vehicle may not be shared with this app.`);
+    }
+  }
+
+  async getVehicleLocation(vehicleJwt: any, tokenId: number): Promise<any> {
+    if (!this.isInitialized || !this.dimo) {
+      throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
+    }
+
+    try {
+      console.log('Querying Telemetry API for location data for tokenId:', tokenId);
+      
+      const query = `
+        {
+          signalsLatest(
+            tokenId: ${tokenId}
+          ) {
+            lastSeen
+            currentLocationLatitude {
+              timestamp
+              value
+            }
+            currentLocationLongitude {
+              timestamp
+              value
+            }
+            dimoAftermarketHDOP {
+              timestamp
+              value
+            }
+          }
+        }
+      `;
+
+      const result = await this.dimo.telemetry.query({
+        ...vehicleJwt,
+        query: query
+      });
+
+      console.log('Telemetry API response for tokenId', tokenId, ':', JSON.stringify(result, null, 2));
+      
+      return result?.data?.signalsLatest || null;
+    } catch (error) {
+      console.error('Error fetching vehicle location for tokenId', tokenId, ':', error);
+      throw new Error(`Failed to fetch vehicle location for tokenId ${tokenId}. Please verify permissions and try again.`);
     }
   }
 }

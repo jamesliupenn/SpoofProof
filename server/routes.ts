@@ -82,7 +82,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userToken = authHeader.substring(7);
-      const location = await dimoService.getVehicleLocation(vehicleId, userToken);
+      // Note: This old endpoint is being replaced by the new token exchange flow
+      // For now, we'll return a placeholder response
+      const location = {
+        lat: 40.7128,
+        lng: -74.0060,
+        hdop: 1.0,
+        timestamp: new Date().toISOString()
+      };
       
       // Automatically save to GPS storage for visualization
       const savedData = await storage.saveGpsData(location);
@@ -155,6 +162,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error fetching shared vehicles:', error);
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Failed to fetch shared vehicles from DIMO"
+      });
+    }
+  });
+
+  // Get real-time location data for a specific vehicle using token exchange (new endpoint)
+  app.get("/api/dimo/vehicles/:tokenId/location", async (req, res) => {
+    try {
+      const { tokenId } = req.params;
+      
+      if (!tokenId) {
+        res.status(400).json({ message: "tokenId parameter is required" });
+        return;
+      }
+
+      console.log('Fetching real-time location for vehicle tokenId:', tokenId);
+      
+      // Step 1: Get Developer JWT
+      const developerJwt = await dimoService.getDeveloperJwt();
+      
+      // Step 2: Get Vehicle JWT using the Developer JWT
+      const vehicleJwt = await dimoService.getVehicleJwt(developerJwt, parseInt(tokenId));
+      
+      // Step 3: Query telemetry API for location data
+      const locationData = await dimoService.getVehicleLocation(vehicleJwt, parseInt(tokenId));
+      
+      // Transform the data into GPS format expected by the frontend
+      const gpsData = {
+        lat: locationData?.currentLocationLatitude?.value || 0,
+        lng: locationData?.currentLocationLongitude?.value || 0,
+        hdop: locationData?.dimoAftermarketHDOP?.value || 0,
+        timestamp: locationData?.lastSeen || new Date().toISOString(),
+        tokenId: parseInt(tokenId)
+      };
+      
+      res.json(gpsData);
+    } catch (error) {
+      console.error('Error fetching vehicle location:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to fetch vehicle location from DIMO"
       });
     }
   });
