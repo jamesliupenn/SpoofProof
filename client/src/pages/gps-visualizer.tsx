@@ -6,6 +6,7 @@ import GpsMap from "@/components/gps-map";
 import GpsControls from "@/components/gps-controls";
 import GpsStatus from "@/components/gps-status";
 import DimoAuth from "@/components/dimo-auth";
+import UserVehicles from "@/components/user-vehicles";
 
 interface GpsData {
   lat: number;
@@ -129,6 +130,7 @@ export default function GpsVisualizer() {
                 gpsData={gpsData}
               />
             </div>
+            <UserVehicles />
           </div>
 
           {/* Map Container */}
