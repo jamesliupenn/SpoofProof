@@ -70,3 +70,31 @@ Preferred communication style: Simple, everyday language.
 
 ### Session Management
 - **connect-pg-simple**: PostgreSQL session store (configured for future use)
+
+## Deployment Configuration
+
+### Production Build Process
+- **Build Script**: Custom `build-production.sh` script handles complete production build
+- **Static File Serving**: Fixed file path mismatch between build output (`dist/public`) and server expectations (`server/public`)
+- **Host Binding**: Server configured to bind to `0.0.0.0:5000` for proper interface access
+- **Environment Detection**: Automatic switching between development (Vite HMR) and production (static file serving) modes
+
+### Build Output Structure
+```
+├── dist/
+│   ├── index.js          # Bundled server (ESBuild)
+│   └── public/           # Client build output (Vite)
+├── server/
+│   └── public/           # Production static files location
+```
+
+### Deployment Requirements
+- Node.js runtime environment
+- Environment variable `NODE_ENV=production`
+- Port configuration via `PORT` environment variable (defaults to 5000)
+- Static files must be properly copied to `server/public` before starting production server
+
+### Recent Changes (August 2025)
+- Fixed deployment configuration issues preventing production builds from serving static files correctly
+- Created production build script that properly handles file structure requirements
+- Verified host binding and port configuration for deployment compatibility
