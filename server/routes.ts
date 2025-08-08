@@ -62,9 +62,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const userToken = authHeader.substring(7); // Remove 'Bearer ' prefix
-      const vehicles = await dimoService.getUserVehicles(userToken);
-      res.json(vehicles);
+      const userWalletAddress = authHeader.substring(7); // Remove 'Bearer ' prefix
+      const clientId = process.env.DIMO_CLIENT_ID || '0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7';
+      
+      const vehicles = await dimoService.getUserVehicles(userWalletAddress, clientId);
+      
+      res.json({
+        walletAddress: userWalletAddress,
+        vehicles: vehicles.nodes || [],
+        count: vehicles.nodes?.length || 0
+      });
     } catch (error) {
       console.error('Error fetching DIMO vehicles:', error);
       res.status(500).json({ message: "Failed to fetch vehicles from DIMO" });
@@ -153,30 +160,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user's shared vehicles from DIMO Identity API
+  // Legacy route - redirects to new endpoint
   app.get("/api/dimo/shared-vehicles", async (req, res) => {
-    try {
-      const { walletAddress } = req.query;
-      
-      if (!walletAddress) {
-        res.status(400).json({ message: "walletAddress query parameter is required" });
-        return;
-      }
-
-      console.log('Fetching shared vehicles for wallet:', walletAddress);
-      const sharedVehicles = await dimoService.getUserSharedVehicles(walletAddress as string);
-      
-      res.json({
-        walletAddress,
-        vehicles: sharedVehicles,
-        count: sharedVehicles.length
-      });
-    } catch (error) {
-      console.error('Error fetching shared vehicles:', error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Failed to fetch shared vehicles from DIMO"
-      });
-    }
+    res.status(410).json({ 
+      message: "This endpoint has been deprecated. Please use /api/dimo/vehicles with proper authentication." 
+    });
   });
 
 

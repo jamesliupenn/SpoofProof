@@ -137,18 +137,35 @@ export class DimoService {
     }
   }
 
-  async getUserVehicles(userToken: string): Promise<any> {
+  async getUserVehicles(userWalletAddress: string, clientId: string): Promise<any> {
     if (!this.isInitialized || !this.dimo) {
       throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
     }
 
     try {
-      const vehicles = await this.dimo.identity.listVehiclesForOwner({
-        owner: userToken,
-        limit: 100
+      // Query vehicles that the user owns and are privileged to the client ID
+      const query = `{
+        vehicles(
+          filterBy: { privileged: "${clientId}", owner: "${userWalletAddress}" }
+          first: 100
+        ) {
+          nodes {
+            owner
+            tokenId
+            definition {
+              make
+              model
+              year
+            }
+          }
+        }
+      }`;
+
+      const response = await this.dimo.identity.query({
+        query: query
       });
-      
-      return vehicles;
+
+      return response?.data?.vehicles || { nodes: [] };
     } catch (error) {
       console.error('Error fetching DIMO vehicles:', error);
       throw new Error('Failed to fetch vehicles from DIMO API. Please verify your credentials.');

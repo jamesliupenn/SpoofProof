@@ -8,15 +8,31 @@ export class DimoService {
     this.dimo = new DIMO('Production'); // Use Production environment
   }
 
-  async getUserVehicles(userToken: string) {
+  async getUserVehicles(userWalletAddress: string, clientId: string) {
     try {
-      // Get user's vehicles using the data SDK
-      const vehicles = await this.dimo.identity.listVehiclesForOwner({
-        owner: userToken, // User's wallet address or token
-        limit: 100 // Adjust as needed
+      // Query vehicles that the user owns and are privileged to the client ID
+      const query = `{
+        vehicles(
+          filterBy: { privileged: "${clientId}", owner: "${userWalletAddress}" }
+          first: 100
+        ) {
+          nodes {
+            owner
+            tokenId
+            definition {
+              make
+              model
+              year
+            }
+          }
+        }
+      }`;
+
+      const response = await this.dimo.identity.query({
+        query: query
       });
-      
-      return vehicles;
+
+      return response.data?.vehicles || { nodes: [] };
     } catch (error) {
       console.error('Error fetching DIMO vehicles:', error);
       throw error;
