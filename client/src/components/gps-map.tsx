@@ -25,9 +25,10 @@ interface GpsMapProps {
   gpsData: GpsData;
   gpsStatus: GpsStatusResult;
   lastKnownLocation: { lat: number; lng: number };
+  focusLocation?: { lat: number; lng: number } | null;
 }
 
-export default function GpsMap({ gpsData, gpsStatus, lastKnownLocation }: GpsMapProps) {
+export default function GpsMap({ gpsData, gpsStatus, lastKnownLocation, focusLocation }: GpsMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -125,6 +126,13 @@ export default function GpsMap({ gpsData, gpsStatus, lastKnownLocation }: GpsMap
     map.setView([displayLat, displayLng], map.getZoom());
 
   }, [gpsData, gpsStatus, lastKnownLocation]);
+
+  // Separate effect for focus location changes
+  useEffect(() => {
+    if (focusLocation && mapInstanceRef.current) {
+      mapInstanceRef.current.setView([focusLocation.lat, focusLocation.lng], 16);
+    }
+  }, [focusLocation]);
 
   useEffect(() => {
     // Cleanup on unmount
