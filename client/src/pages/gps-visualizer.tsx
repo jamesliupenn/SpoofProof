@@ -5,6 +5,7 @@ import dimoLogo from "@assets/Logo_DIMOBuild_black_1754591736408.png";
 import GpsMap from "@/components/gps-map";
 import GpsControls from "@/components/gps-controls";
 import GpsStatus from "@/components/gps-status";
+import DimoAuth from "@/components/dimo-auth";
 
 interface GpsData {
   lat: number;
@@ -105,6 +106,7 @@ export default function GpsVisualizer() {
                   </span>
                 </span>
               </div>
+              <DimoAuth />
             </div>
           </div>
         </div>
