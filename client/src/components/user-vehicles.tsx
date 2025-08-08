@@ -80,6 +80,8 @@ export default function UserVehicles() {
     enabled: isAuthenticated && !!walletAddress,
   });
 
+
+
   const locationMutation = useMutation({
     mutationFn: fetchVehicleLocation,
     onSuccess: (locationData) => {
@@ -191,8 +193,7 @@ export default function UserVehicles() {
         </CardTitle>
         <CardDescription>
           {vehicles.length > 0
-            ? `${vehicles.length} vehicle${vehicles.length > 1 ? "s" : ""} shared with this app`
-            : "No vehicles currently shared with this app"}
+            ? `${vehicles.length} vehicle${vehicles.length > 1 ? "s" : ""} shared` : "No vehicles currently shared"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -201,8 +202,7 @@ export default function UserVehicles() {
             <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">No vehicles shared yet</p>
             <p className="text-xs mt-1">
-              Use the "Share Vehicles" button above to grant this app access to
-              your vehicle data
+              Use the "Share Vehicles" button above to grant this app access to your vehicle data
             </p>
           </div>
         ) : (
