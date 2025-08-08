@@ -117,3 +117,9 @@ Preferred communication style: Simple, everyday language.
   - Updated getUserVehicles function to use Identity API GraphQL query with filterBy: { privileged, owner }
   - Fixed service layer to properly query vehicles owned by user and privileged to DIMO Client ID
   - Successfully verified API returns user's 2 vehicles: Toyota Camry 2025 (tokenId 180895), Lexus NX 2021 (tokenId 117315)
+- **JWT Caching & Expiration Management (August 8, 2025)**: Implemented comprehensive JWT lifecycle management
+  - Added Developer JWT caching with 14-day expiration (cached for 13 days with 1-hour safety margin)
+  - Added Vehicle JWT caching with 10-minute expiration (cached for 9 minutes with 1-minute safety margin)
+  - Implemented automatic JWT cleanup every 5 minutes to remove expired tokens
+  - Added try-catch blocks for JWT failures with automatic cache invalidation on errors
+  - Optimized API performance by reusing valid cached JWTs instead of fetching new ones unnecessarily
