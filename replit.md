@@ -112,3 +112,8 @@ Preferred communication style: Simple, everyday language.
   - Integrated vehicle location data directly into GPS visualization system for seamless map updates
   - Added proper error handling for missing vehicles, invalid tokens, and API failures
   - Configured DIMO_API_KEY environment variable for secure authentication with DIMO services
+- **API Endpoint Correction (August 8, 2025)**: Fixed vehicle fetching API to use proper GraphQL query format
+  - Corrected API endpoint from /api/dimo/shared-vehicles to /api/dimo/vehicles with Authorization Bearer token
+  - Updated getUserVehicles function to use Identity API GraphQL query with filterBy: { privileged, owner }
+  - Fixed service layer to properly query vehicles owned by user and privileged to DIMO Client ID
+  - Successfully verified API returns user's 2 vehicles: Toyota Camry 2025 (tokenId 180895), Lexus NX 2021 (tokenId 117315)

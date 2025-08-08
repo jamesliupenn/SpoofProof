@@ -1,4 +1,8 @@
-import { ShareVehiclesWithDimo, LogoutWithDimo, useDimoAuthState } from "@dimo-network/login-with-dimo";
+import {
+  ShareVehiclesWithDimo,
+  LogoutWithDimo,
+  useDimoAuthState,
+} from "@dimo-network/login-with-dimo";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Car } from "lucide-react";
 
@@ -16,7 +20,9 @@ export default function DimoAuth() {
   };
 
   // Calculate expiration date 1 month from now
-  const expirationDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const expirationDate = new Date(
+    Date.now() + 30 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   if (isAuthenticated) {
     return (
@@ -24,7 +30,10 @@ export default function DimoAuth() {
         <div className="flex items-center space-x-2 text-sm">
           <User className="text-blue-600" size={16} />
           <div className="hidden sm:block">
-            <div className="font-medium text-slate-900" data-testid="user-email">
+            <div
+              className="font-medium text-slate-900"
+              data-testid="user-email"
+            >
               {email || "DIMO User"}
             </div>
             {walletAddress && (
@@ -34,10 +43,14 @@ export default function DimoAuth() {
             )}
           </div>
         </div>
-        <LogoutWithDimo>
-          <Button 
-            variant="outline" 
-            size="sm" 
+        <LogoutWithDimo
+          mode="redirect"
+          onSuccess={handleShareSuccess}
+          onError={handleShareError}
+        >
+          <Button
+            variant="outline"
+            size="sm"
             className="flex items-center space-x-1"
             data-testid="button-logout"
           >
@@ -59,9 +72,9 @@ export default function DimoAuth() {
       onSuccess={handleShareSuccess}
       onError={handleShareError}
     >
-      <Button 
-        variant="default" 
-        size="sm" 
+      <Button
+        variant="default"
+        size="sm"
         className="flex items-center space-x-2"
         data-testid="button-share-vehicles"
       >

@@ -1,9 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDimoAuthState } from "@dimo-network/login-with-dimo";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Car, Calendar, Shield, AlertTriangle, MapPin, Loader2 } from "lucide-react";
+import {
+  Car,
+  Calendar,
+  Shield,
+  AlertTriangle,
+  MapPin,
+  Loader2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Vehicle {
@@ -29,23 +42,29 @@ interface SharedVehiclesResponse {
   count: number;
 }
 
-const fetchSharedVehicles = async (walletAddress: string): Promise<SharedVehiclesResponse> => {
-  const response = await fetch(`/api/dimo/shared-vehicles?walletAddress=${encodeURIComponent(walletAddress)}`);
-  
+const fetchUserVehicles = async (
+  walletAddress: string,
+): Promise<SharedVehiclesResponse> => {
+  const response = await fetch('/api/dimo/vehicles', {
+    headers: {
+      'Authorization': `Bearer ${walletAddress}`
+    }
+  });
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch shared vehicles: ${response.statusText}`);
+    throw new Error(`Failed to fetch vehicles: ${response.statusText}`);
   }
-  
+
   return response.json();
 };
 
 const fetchVehicleLocation = async (tokenId: number) => {
   const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
   }
-  
+
   return response.json();
 };
 
@@ -54,11 +73,9 @@ export default function UserVehicles() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-
-
   const { data, isLoading, error } = useQuery({
-    queryKey: ['/api/dimo/shared-vehicles', walletAddress],
-    queryFn: () => fetchSharedVehicles(walletAddress!),
+    queryKey: ["/api/dimo/vehicles", walletAddress],
+    queryFn: () => fetchUserVehicles(walletAddress!),
     enabled: isAuthenticated && !!walletAddress,
   });
 
@@ -71,18 +88,21 @@ export default function UserVehicles() {
           description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)} (HDOP: ${locationData.hdop})`,
         });
         // Invalidate GPS data to trigger a refresh of the map
-        queryClient.invalidateQueries({ queryKey: ['/api/gps'] });
-        
+        queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
+
         // Notify parent component to focus on the new location
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('focusMapLocation', {
-            detail: { lat: locationData.lat, lng: locationData.lng }
-          }));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("focusMapLocation", {
+              detail: { lat: locationData.lat, lng: locationData.lng },
+            }),
+          );
         }
       } else {
         toast({
           title: "No Location Data",
-          description: "Vehicle location data is not available or GPS signal is poor",
+          description:
+            "Vehicle location data is not available or GPS signal is poor",
           variant: "destructive",
         });
       }
@@ -90,7 +110,10 @@ export default function UserVehicles() {
     onError: (error) => {
       toast({
         title: "Location Fetch Failed",
-        description: error instanceof Error ? error.message : "Failed to fetch vehicle location",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vehicle location",
         variant: "destructive",
       });
     },
@@ -104,13 +127,11 @@ export default function UserVehicles() {
             <Car className="h-5 w-5" />
             My Shared Vehicles
           </CardTitle>
-          <CardDescription>
-            Sign in with DIMO to view vehicles you've shared with this app
-          </CardDescription>
+          <CardDescription>Sign in with DIMO to view vehicles</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-4 text-muted-foreground">
-            Please authenticate with DIMO to view your shared vehicles
+            Authenticate to view your vehicles
           </div>
         </CardContent>
       </Card>
@@ -149,7 +170,9 @@ export default function UserVehicles() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-4 text-red-600">
-            {error instanceof Error ? error.message : 'Failed to load shared vehicles'}
+            {error instanceof Error
+              ? error.message
+              : "Failed to load shared vehicles"}
           </div>
         </CardContent>
       </Card>
@@ -166,10 +189,9 @@ export default function UserVehicles() {
           My Shared Vehicles
         </CardTitle>
         <CardDescription>
-          {vehicles.length > 0 
-            ? `${vehicles.length} vehicle${vehicles.length > 1 ? 's' : ''} shared with this app`
-            : 'No vehicles currently shared with this app'
-          }
+          {vehicles.length > 0
+            ? `${vehicles.length} vehicle${vehicles.length > 1 ? "s" : ""} shared with this app`
+            : "No vehicles currently shared with this app"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -178,7 +200,8 @@ export default function UserVehicles() {
             <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">No vehicles shared yet</p>
             <p className="text-xs mt-1">
-              Use the "Share Vehicles" button above to grant this app access to your vehicle data
+              Use the "Share Vehicles" button above to grant this app access to
+              your vehicle data
             </p>
           </div>
         ) : (
@@ -191,14 +214,24 @@ export default function UserVehicles() {
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold text-lg" data-testid={`vehicle-name-${vehicle.tokenId}`}>
-                      {vehicle.definition.year} {vehicle.definition.make} {vehicle.definition.model}
+                    <h3
+                      className="font-semibold text-lg"
+                      data-testid={`vehicle-name-${vehicle.tokenId}`}
+                    >
+                      {vehicle.definition.year} {vehicle.definition.make}{" "}
+                      {vehicle.definition.model}
                     </h3>
-                    <p className="text-sm text-muted-foreground" data-testid={`vehicle-token-${vehicle.tokenId}`}>
+                    <p
+                      className="text-sm text-muted-foreground"
+                      data-testid={`vehicle-token-${vehicle.tokenId}`}
+                    >
                       Token ID: {vehicle.tokenId}
                     </p>
                   </div>
-                  <Badge variant="secondary" data-testid={`vehicle-status-${vehicle.tokenId}`}>
+                  <Badge
+                    variant="secondary"
+                    data-testid={`vehicle-status-${vehicle.tokenId}`}
+                  >
                     Shared
                   </Badge>
                 </div>
@@ -216,7 +249,9 @@ export default function UserVehicles() {
                     ) : (
                       <MapPin className="h-4 w-4 mr-2" />
                     )}
-                    {locationMutation.isPending ? 'Fetching...' : 'Get Location'}
+                    {locationMutation.isPending
+                      ? "Fetching..."
+                      : "Get Location"}
                   </Button>
                 </div>
 
@@ -227,7 +262,10 @@ export default function UserVehicles() {
                       Permissions
                     </h4>
                     {vehicle.sacds.nodes.map((sacd, index) => (
-                      <div key={index} className="bg-muted/50 rounded p-3 text-sm">
+                      <div
+                        key={index}
+                        className="bg-muted/50 rounded p-3 text-sm"
+                      >
                         <div className="flex flex-wrap gap-1 mb-2">
                           <Badge variant="outline" className="text-xs">
                             {sacd.permissions}
@@ -236,11 +274,13 @@ export default function UserVehicles() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Created: {new Date(sacd.createdAt).toLocaleDateString()}
+                            Created:{" "}
+                            {new Date(sacd.createdAt).toLocaleDateString()}
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Expires: {new Date(sacd.expiresAt).toLocaleDateString()}
+                            Expires:{" "}
+                            {new Date(sacd.expiresAt).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
