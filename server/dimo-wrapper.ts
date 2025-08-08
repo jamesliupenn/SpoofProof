@@ -25,10 +25,39 @@ export class DimoService {
   private isInitialized = false;
   private dimo: any = null;
   private clientId: string;
+  private developerJwt: string | null = null;
+  private developerJwtExpires: Date | null = null;
+  private vehicleJwts: Map<number, { jwt: string; expires: Date }> = new Map();
 
   constructor() {
     this.clientId = process.env.DIMO_CLIENT_ID || '';
     this.initializeSDK();
+    // Clean up expired JWTs every 5 minutes
+    setInterval(() => this.cleanupExpiredJwts(), 5 * 60 * 1000);
+  }
+
+  private cleanupExpiredJwts() {
+    const now = new Date();
+    
+    // Clean up expired Developer JWT
+    if (this.developerJwtExpires && this.developerJwtExpires < now) {
+      console.log('Cleaning up expired Developer JWT');
+      this.developerJwt = null;
+      this.developerJwtExpires = null;
+    }
+
+    // Clean up expired Vehicle JWTs
+    const expiredTokenIds: number[] = [];
+    for (const [tokenId, vehicleJwt] of this.vehicleJwts.entries()) {
+      if (vehicleJwt.expires < now) {
+        expiredTokenIds.push(tokenId);
+      }
+    }
+    
+    if (expiredTokenIds.length > 0) {
+      console.log(`Cleaning up expired Vehicle JWTs for tokenIds: ${expiredTokenIds.join(', ')}`);
+      expiredTokenIds.forEach(tokenId => this.vehicleJwts.delete(tokenId));
+    }
   }
 
   private async initializeSDK() {
@@ -280,6 +309,12 @@ export class DimoService {
       throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
     }
 
+    // Check if we have a valid cached Developer JWT (expires in 14 days)
+    if (this.developerJwt && this.developerJwtExpires && this.developerJwtExpires > new Date()) {
+      console.log('Using cached Developer JWT (expires:', this.developerJwtExpires.toISOString(), ')');
+      return { access_token: this.developerJwt };
+    }
+
     const clientId = process.env.DIMO_CLIENT_ID;
     const redirectUri = process.env.DIMO_REDIRECT_URI;
     const privateKey = process.env.DIMO_API_KEY;
@@ -289,7 +324,7 @@ export class DimoService {
     }
 
     try {
-      console.log('Getting Developer JWT with Client ID:', clientId);
+      console.log('Fetching new Developer JWT with Client ID:', clientId);
       
       const developerJwt = await this.dimo.auth.getDeveloperJwt({
         client_id: clientId,
@@ -297,10 +332,17 @@ export class DimoService {
         private_key: privateKey
       });
 
-      console.log('Developer JWT obtained successfully');
+      // Cache the Developer JWT with 14-day expiration (minus 1 hour for safety)
+      this.developerJwt = developerJwt.access_token;
+      this.developerJwtExpires = new Date(Date.now() + (13 * 24 * 60 * 60 * 1000)); // 13 days
+      
+      console.log('New Developer JWT obtained and cached (expires:', this.developerJwtExpires.toISOString(), ')');
       return developerJwt;
     } catch (error) {
       console.error('Error getting Developer JWT:', error);
+      // Clear cached JWT on error
+      this.developerJwt = null;
+      this.developerJwtExpires = null;
       throw new Error('Failed to obtain Developer JWT from DIMO. Please verify your API credentials.');
     }
   }
@@ -310,18 +352,34 @@ export class DimoService {
       throw new Error('DIMO SDK not available. Please check your API credentials and try again.');
     }
 
+    // Check if we have a valid cached Vehicle JWT (expires in 10 minutes)
+    const cachedVehicleJwt = this.vehicleJwts.get(tokenId);
+    if (cachedVehicleJwt && cachedVehicleJwt.expires > new Date()) {
+      console.log(`Using cached Vehicle JWT for tokenId: ${tokenId} (expires: ${cachedVehicleJwt.expires.toISOString()})`);
+      return { access_token: cachedVehicleJwt.jwt };
+    }
+
     try {
-      console.log('Getting Vehicle JWT for tokenId:', tokenId);
+      console.log('Fetching new Vehicle JWT for tokenId:', tokenId);
       
       const vehicleJwt = await this.dimo.tokenexchange.getVehicleJwt({
         ...developerJwt,
         tokenId: tokenId
       });
 
-      console.log('Vehicle JWT obtained successfully for tokenId:', tokenId);
+      // Cache the Vehicle JWT with 10-minute expiration (minus 1 minute for safety)
+      const expires = new Date(Date.now() + (9 * 60 * 1000)); // 9 minutes
+      this.vehicleJwts.set(tokenId, {
+        jwt: vehicleJwt.access_token,
+        expires: expires
+      });
+
+      console.log(`New Vehicle JWT obtained and cached for tokenId: ${tokenId} (expires: ${expires.toISOString()})`);
       return vehicleJwt;
     } catch (error) {
       console.error('Error getting Vehicle JWT for tokenId', tokenId, ':', error);
+      // Remove cached JWT on error
+      this.vehicleJwts.delete(tokenId);
       throw new Error(`Failed to obtain Vehicle JWT for tokenId ${tokenId}. Vehicle may not be shared with this app.`);
     }
   }
