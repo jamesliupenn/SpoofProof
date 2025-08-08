@@ -171,6 +171,24 @@ export default function UserVehicles() {
             <p className="text-xs mt-1">
               Use the "Share Vehicles" button above to grant this app access to your vehicle data
             </p>
+            <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+              <p className="text-xs text-blue-700 font-medium">Test with Vehicle 117315</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => locationMutation.mutate(117315)}
+                disabled={locationMutation.isPending}
+                data-testid="test-vehicle-location"
+              >
+                {locationMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <MapPin className="h-4 w-4 mr-2" />
+                )}
+                Test Real Vehicle Data
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
