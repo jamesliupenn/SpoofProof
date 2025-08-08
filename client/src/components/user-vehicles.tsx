@@ -15,7 +15,7 @@ interface Vehicle {
   };
   sacds: {
     nodes: Array<{
-      permissions: string[];
+      permissions: string;
       grantee: string;
       createdAt: string;
       expiresAt: string;
@@ -54,6 +54,8 @@ export default function UserVehicles() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['/api/dimo/shared-vehicles', walletAddress],
     queryFn: () => fetchSharedVehicles(walletAddress!),
@@ -70,6 +72,13 @@ export default function UserVehicles() {
         });
         // Invalidate GPS data to trigger a refresh of the map
         queryClient.invalidateQueries({ queryKey: ['/api/gps'] });
+        
+        // Notify parent component to focus on the new location
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('focusMapLocation', {
+            detail: { lat: locationData.lat, lng: locationData.lng }
+          }));
+        }
       } else {
         toast({
           title: "No Location Data",
@@ -171,24 +180,6 @@ export default function UserVehicles() {
             <p className="text-xs mt-1">
               Use the "Share Vehicles" button above to grant this app access to your vehicle data
             </p>
-            <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-              <p className="text-xs text-blue-700 font-medium">Test with Vehicle 117315</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() => locationMutation.mutate(117315)}
-                disabled={locationMutation.isPending}
-                data-testid="test-vehicle-location"
-              >
-                {locationMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <MapPin className="h-4 w-4 mr-2" />
-                )}
-                Test Real Vehicle Data
-              </Button>
-            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -238,11 +229,9 @@ export default function UserVehicles() {
                     {vehicle.sacds.nodes.map((sacd, index) => (
                       <div key={index} className="bg-muted/50 rounded p-3 text-sm">
                         <div className="flex flex-wrap gap-1 mb-2">
-                          {sacd.permissions.map((permission, pIndex) => (
-                            <Badge key={pIndex} variant="outline" className="text-xs">
-                              {permission}
-                            </Badge>
-                          ))}
+                          <Badge variant="outline" className="text-xs">
+                            {sacd.permissions}
+                          </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">

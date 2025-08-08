@@ -51,6 +51,8 @@ export default function GpsVisualizer() {
     lng: -74.0060
   });
 
+  const [focusLocation, setFocusLocation] = useState<{ lat: number; lng: number } | null>(null);
+
   const { data: testScenarios = [] } = useQuery<TestScenario[]>({
     queryKey: ['/api/gps/test-scenarios'],
   });
@@ -65,6 +67,20 @@ export default function GpsVisualizer() {
       setLastKnownLocation({ lat: newData.lat, lng: newData.lng });
     }
   };
+
+  // Listen for focus location events from vehicle location fetches
+  useEffect(() => {
+    const handleFocusLocation = (event: CustomEvent) => {
+      setFocusLocation(event.detail);
+      // Clear focus location after a short delay to allow map to center
+      setTimeout(() => setFocusLocation(null), 100);
+    };
+
+    window.addEventListener('focusMapLocation', handleFocusLocation as EventListener);
+    return () => {
+      window.removeEventListener('focusMapLocation', handleFocusLocation as EventListener);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="gps-visualizer">
@@ -165,6 +181,7 @@ export default function GpsVisualizer() {
                   gpsData={gpsData}
                   gpsStatus={gpsStatus}
                   lastKnownLocation={lastKnownLocation}
+                  focusLocation={focusLocation}
                 />
               </div>
             </div>
