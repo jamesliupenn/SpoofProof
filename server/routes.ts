@@ -113,6 +113,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/dimo/vehicles/:vehicleId/telemetry", async (req, res) => {
+    try {
+      const { vehicleId } = req.params;
+      const { signals } = req.query;
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ message: "Missing or invalid authorization token" });
+        return;
+      }
+
+      const requestedSignals = signals ? (signals as string).split(',') : [];
+      const telemetryData = await dimoService.getVehicleTelemetry(vehicleId, requestedSignals);
+      res.json(telemetryData);
+    } catch (error) {
+      console.error('Error fetching DIMO vehicle telemetry:', error);
+      res.status(500).json({ message: "Failed to fetch vehicle telemetry from DIMO" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
