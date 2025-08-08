@@ -1,17 +1,20 @@
-import { LoginWithDimo, LogoutWithDimo, useDimoAuthState } from "@dimo-network/login-with-dimo";
+import { ShareVehiclesWithDimo, LogoutWithDimo, useDimoAuthState } from "@dimo-network/login-with-dimo";
 import { Button } from "@/components/ui/button";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Car } from "lucide-react";
 
 export default function DimoAuth() {
   const { isAuthenticated, email, walletAddress } = useDimoAuthState();
 
-  const handleLoginSuccess = (authData: any) => {
-    console.log("DIMO login successful:", authData);
+  const handleShareSuccess = (authData: any) => {
+    console.log("DIMO vehicle sharing successful:", authData);
   };
 
-  const handleLoginError = (error: any) => {
-    console.error("DIMO login failed:", error);
+  const handleShareError = (error: any) => {
+    console.error("DIMO vehicle sharing failed:", error);
   };
+
+  // Calculate expiration date 1 month from now
+  const expirationDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
   if (isAuthenticated) {
     return (
@@ -45,20 +48,23 @@ export default function DimoAuth() {
   }
 
   return (
-    <LoginWithDimo
+    <ShareVehiclesWithDimo
       mode="popup"
-      onSuccess={handleLoginSuccess}
-      onError={handleLoginError}
+      permissions="10111111"
+      expirationDate={expirationDate}
+      onSuccess={handleShareSuccess}
+      onError={handleShareError}
     >
       <Button 
         variant="default" 
         size="sm" 
         className="flex items-center space-x-2"
-        data-testid="button-login"
+        data-testid="button-share-vehicles"
       >
-        <User size={14} />
-        <span>Login with DIMO</span>
+        <Car size={14} />
+        <span className="hidden sm:inline">Share Vehicles</span>
+        <span className="sm:hidden">Share</span>
       </Button>
-    </LoginWithDimo>
+    </ShareVehiclesWithDimo>
   );
 }
