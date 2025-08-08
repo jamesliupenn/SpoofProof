@@ -50,7 +50,7 @@ export default function DimoAuth() {
   return (
     <ShareVehiclesWithDimo
       mode="redirect"
-      permissions="10111111"
+      permissionTemplateId={2}
       expirationDate={expirationDate}
       unAuthenticatedLabel="Show My Vehicles"
       authenticatedLabel="Manage My Vehicles"
