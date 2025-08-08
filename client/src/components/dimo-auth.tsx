@@ -59,11 +59,11 @@ export default function DimoAuth() {
         variant="default" 
         size="sm" 
         className="flex items-center space-x-2"
-        data-testid="button-share-vehicles"
+        data-testid="button-show-vehicle"
       >
         <Car size={14} />
-        <span className="hidden sm:inline">Share Vehicles</span>
-        <span className="sm:hidden">Share</span>
+        <span className="hidden sm:inline">Show My Vehicle</span>
+        <span className="sm:hidden">Vehicle</span>
       </Button>
     </ShareVehiclesWithDimo>
   );
