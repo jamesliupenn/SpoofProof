@@ -5,9 +5,11 @@ import {
 } from "@dimo-network/login-with-dimo";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Car } from "lucide-react";
+import { useCachedDimoAuth } from "@/hooks/use-cached-auth";
 
 export default function DimoAuth() {
-  const { isAuthenticated, email, walletAddress } = useDimoAuthState();
+  const { isAuthenticated, email, walletAddress, isFromCache } = useCachedDimoAuth();
+  const dimoSdkState = useDimoAuthState();
 
   const handleShareSuccess = (authData: any) => {
     console.log("DIMO vehicle sharing successful:", authData);
@@ -17,6 +19,19 @@ export default function DimoAuth() {
 
   const handleShareError = (error: any) => {
     console.error("DIMO vehicle sharing failed:", error);
+  };
+
+  const handleLogoutSuccess = () => {
+    console.log("DIMO logout successful");
+    // Clear cached wallet address on logout
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('dimo_cached_wallet_address');
+      localStorage.removeItem('dimo_cached_email');
+    }
+  };
+
+  const handleLogoutError = (error: any) => {
+    console.error("DIMO logout failed:", error);
   };
 
   // Calculate expiration date 1 month from now
@@ -39,14 +54,15 @@ export default function DimoAuth() {
             {walletAddress && (
               <div className="text-xs text-slate-500" data-testid="user-wallet">
                 {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
+                {isFromCache && <span className="ml-1 text-orange-500">(cached)</span>}
               </div>
             )}
           </div>
         </div>
         <LogoutWithDimo
           mode="redirect"
-          onSuccess={handleShareSuccess}
-          onError={handleShareError}
+          onSuccess={handleLogoutSuccess}
+          onError={handleLogoutError}
         >
           <Button
             variant="outline"

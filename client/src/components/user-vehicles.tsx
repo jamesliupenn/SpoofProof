@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useDimoAuthState } from "@dimo-network/login-with-dimo";
+import { useCachedDimoAuth } from "@/hooks/use-cached-auth";
 import {
   Card,
   CardContent,
@@ -70,7 +70,7 @@ const fetchVehicleLocation = async (tokenId: number) => {
 };
 
 export default function UserVehicles() {
-  const { isAuthenticated, walletAddress } = useDimoAuthState();
+  const { isAuthenticated, walletAddress, email, isFromCache } = useCachedDimoAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -194,6 +194,7 @@ export default function UserVehicles() {
         <CardDescription>
           {vehicles.length > 0
             ? `${vehicles.length} vehicle${vehicles.length > 1 ? "s" : ""} shared` : "No vehicles currently shared"}
+          {isFromCache && <span className="text-orange-500 text-xs ml-2">(using cached auth)</span>}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -204,6 +205,7 @@ export default function UserVehicles() {
             <p className="text-xs mt-1">
               Use the "Share Vehicles" button above to grant this app access to your vehicle data
             </p>
+
           </div>
         ) : (
           <div className="space-y-4">

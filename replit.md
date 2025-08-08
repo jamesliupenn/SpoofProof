@@ -123,3 +123,10 @@ Preferred communication style: Simple, everyday language.
   - Implemented automatic JWT cleanup every 5 minutes to remove expired tokens
   - Added try-catch blocks for JWT failures with automatic cache invalidation on errors
   - Optimized API performance by reusing valid cached JWTs instead of fetching new ones unnecessarily
+- **Wallet Address Caching & Persistent Auth (August 8, 2025)**: Implemented authentication state persistence
+  - Created `useCachedDimoAuth` hook to manage wallet address caching in localStorage
+  - Authentication persists across browser sessions and page reloads using cached wallet address
+  - Automatic cache invalidation when user explicitly logs out via LogoutWithDimo component
+  - Visual indicators show when authentication is from cache vs. live DIMO SDK state
+  - Seamless integration with existing vehicle query system - cached auth enables vehicle display
+  - Cache keys: `dimo_cached_wallet_address` and `dimo_cached_email` stored in localStorage
