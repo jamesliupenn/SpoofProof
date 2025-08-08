@@ -7,6 +7,8 @@ export default function DimoAuth() {
 
   const handleShareSuccess = (authData: any) => {
     console.log("DIMO vehicle sharing successful:", authData);
+    // Redirect back to the app after successful authentication
+    window.location.href = window.location.origin;
   };
 
   const handleShareError = (error: any) => {
