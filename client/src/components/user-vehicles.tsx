@@ -63,12 +63,20 @@ export default function UserVehicles() {
   const locationMutation = useMutation({
     mutationFn: fetchVehicleLocation,
     onSuccess: (locationData) => {
-      toast({
-        title: "Location Updated",
-        description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)}`,
-      });
-      // Invalidate GPS data to trigger a refresh of the map
-      queryClient.invalidateQueries({ queryKey: ['/api/gps'] });
+      if (locationData.lat && locationData.lng) {
+        toast({
+          title: "Location Updated",
+          description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)} (HDOP: ${locationData.hdop})`,
+        });
+        // Invalidate GPS data to trigger a refresh of the map
+        queryClient.invalidateQueries({ queryKey: ['/api/gps'] });
+      } else {
+        toast({
+          title: "No Location Data",
+          description: "Vehicle location data is not available or GPS signal is poor",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error) => {
       toast({
