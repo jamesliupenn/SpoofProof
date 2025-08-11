@@ -92,13 +92,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Fetching real-time location for vehicle tokenId:', tokenId);
       
-      // For now, return mock location data as the wrapper methods are removed
-      const locationData = {
-        currentLocationLatitude: { value: 40.7128 },
-        currentLocationLongitude: { value: -74.0060 },
-        dimoAftermarketHDOP: { value: 1.5 },
-        lastSeen: new Date().toISOString()
-      };
+      // Step 1: Get Developer JWT
+      const developerJwt = await dimoService.getDeveloperJwt();
+      
+      // Step 2: Get Vehicle JWT using the Developer JWT
+      const vehicleJwt = await dimoService.getVehicleJwt(developerJwt, tokenId);
+      
+      // Step 3: Query telemetry API for location data
+      const locationData = await dimoService.getVehicleLocation(vehicleJwt, tokenId);
       
       // Transform the data into GPS format expected by the frontend
       const gpsData = {
@@ -132,11 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userToken = authHeader.substring(7);
-      // For now, return mock vehicle data as the wrapper methods are removed
-      const vehicleData = {
-        tokenId: parseInt(vehicleId),
-        message: "DIMO wrapper removed - using direct SDK"
-      };
+      const vehicleData = await dimoService.getVehicleData(vehicleId, userToken);
       res.json(vehicleData);
     } catch (error) {
       console.error('Error fetching DIMO vehicle data:', error);
@@ -156,12 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const requestedSignals = signals ? (signals as string).split(',') : [];
-      // For now, return mock telemetry data as the wrapper methods are removed
-      const telemetryData = {
-        tokenId: parseInt(vehicleId),
-        signals: requestedSignals,
-        message: "DIMO wrapper removed - using direct SDK"
-      };
+      const telemetryData = await dimoService.getVehicleTelemetry(vehicleId, requestedSignals);
       res.json(telemetryData);
     } catch (error) {
       console.error('Error fetching DIMO vehicle telemetry:', error);

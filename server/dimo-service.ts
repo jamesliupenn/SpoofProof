@@ -1,107 +1,232 @@
-// DIMO data service with mock implementation due to ES module compatibility issues
-// The @dimo-network/data-sdk package has unresolvable directory import issues
+import { DIMO } from '@dimo-network/data-sdk';
 
+// DIMO data service using authentic SDK with ES Next Module support
 export class DimoService {
-  private mockVehicles: any[];
+  private dimo: DIMO;
+  private developerJwt: string | null = null;
+  private developerJwtExpires: Date | null = null;
+  private vehicleJwts: Map<number, { jwt: string; expires: Date }> = new Map();
 
   constructor() {
-    // Mock vehicle data for testing - represents the user's actual vehicles
-    this.mockVehicles = [
-      {
-        tokenId: 180895,
-        owner: "0xCAA591fA19a86762D1ed1B98b2057Ee233240b65",
-        definition: {
-          make: "Toyota",
-          model: "Camry",
-          year: 2025
-        }
-      },
-      {
-        tokenId: 117315,
-        owner: "0xCAA591fA19a86762D1ed1B98b2057Ee233240b65",
-        definition: {
-          make: "Lexus",
-          model: "NX",
-          year: 2021
-        }
+    this.dimo = new DIMO('Production');
+    console.log('DimoService initialized with authentic DIMO SDK');
+    
+    // Clean up expired JWTs every 5 minutes
+    setInterval(() => this.cleanupExpiredJwts(), 5 * 60 * 1000);
+  }
+
+  private cleanupExpiredJwts() {
+    const now = new Date();
+    
+    // Clean up expired Developer JWT
+    if (this.developerJwtExpires && this.developerJwtExpires < now) {
+      console.log('Cleaning up expired Developer JWT');
+      this.developerJwt = null;
+      this.developerJwtExpires = null;
+    }
+
+    // Clean up expired Vehicle JWTs
+    const expiredTokenIds: number[] = [];
+    for (const [tokenId, vehicleJwt] of this.vehicleJwts.entries()) {
+      if (vehicleJwt.expires < now) {
+        expiredTokenIds.push(tokenId);
       }
-    ];
-    console.log('DimoService initialized with mock implementation (DIMO SDK unavailable due to ES module issues)');
+    }
+    
+    if (expiredTokenIds.length > 0) {
+      console.log(`Cleaning up expired Vehicle JWTs for tokenIds: ${expiredTokenIds.join(', ')}`);
+      expiredTokenIds.forEach(tokenId => this.vehicleJwts.delete(tokenId));
+    }
   }
 
   async getUserVehicles(userWalletAddress: string, clientId: string) {
-    console.log(`Mock DIMO: getUserVehicles called for wallet: ${userWalletAddress}, clientId: ${clientId}`);
+    console.log(`DIMO SDK: getUserVehicles called for wallet: ${userWalletAddress}, clientId: ${clientId}`);
     
-    // Return mock vehicles if the wallet matches the test user
-    if (userWalletAddress === "0xCAA591fA19a86762D1ed1B98b2057Ee233240b65") {
-      console.log('Mock DIMO: Returning user vehicles:', this.mockVehicles);
-      return { nodes: this.mockVehicles };
+    try {
+      // Query vehicles that the user owns and are privileged to the client ID
+      const query = `{
+        vehicles(
+          filterBy: { privileged: "${clientId}", owner: "${userWalletAddress}" }
+          first: 100
+        ) {
+          nodes {
+            owner
+            tokenId
+            definition {
+              make
+              model
+              year
+            }
+          }
+        }
+      }`;
+
+      console.log('Executing GraphQL query:', query);
+      const response = await this.dimo.identity.query({
+        query: query
+      });
+
+      console.log('DIMO Identity API response:', response);
+      return response?.data?.vehicles || { nodes: [] };
+    } catch (error) {
+      console.error('Error fetching DIMO vehicles:', error);
+      throw error;
     }
-    
-    console.log('Mock DIMO: No vehicles found for this wallet address');
-    return { nodes: [] };
   }
 
   async getVehicleData(vehicleId: string, userToken: string) {
-    console.log(`Mock DIMO: getVehicleData called for vehicleId: ${vehicleId}`);
+    console.log(`DIMO SDK: getVehicleData called for vehicleId: ${vehicleId}`);
     
-    const tokenId = parseInt(vehicleId);
-    const vehicle = this.mockVehicles.find(v => v.tokenId === tokenId);
-    
-    if (vehicle) {
-      console.log('Mock DIMO: Returning vehicle data:', vehicle);
-      return vehicle;
+    try {
+      const vehicleData = await this.dimo.identity.getVehicle({
+        tokenId: parseInt(vehicleId)
+      });
+      
+      console.log('DIMO vehicle data:', vehicleData);
+      return vehicleData;
+    } catch (error) {
+      console.error('Error fetching DIMO vehicle data:', error);
+      throw error;
     }
-    
-    throw new Error(`Vehicle with tokenId ${tokenId} not found or not accessible`);
   }
 
-  async getVehicleLocation(vehicleId: string, userToken: string) {
-    console.log(`Mock DIMO: getVehicleLocation called for vehicleId: ${vehicleId}`);
-    
-    const tokenId = parseInt(vehicleId);
-    const vehicle = this.mockVehicles.find(v => v.tokenId === tokenId);
-    
-    if (!vehicle) {
-      throw new Error(`Vehicle with tokenId ${tokenId} not found or not accessible`);
+  async getDeveloperJwt(): Promise<any> {
+    // Check if we have a valid cached Developer JWT (expires in 14 days)
+    if (this.developerJwt && this.developerJwtExpires && this.developerJwtExpires > new Date()) {
+      console.log('Using cached Developer JWT (expires:', this.developerJwtExpires.toISOString(), ')');
+      return { access_token: this.developerJwt };
     }
 
-    // Return mock location data (New York City coordinates)
-    const mockLocation = {
-      lat: 40.7128 + (Math.random() - 0.5) * 0.01, // Small random variation
-      lng: -74.0060 + (Math.random() - 0.5) * 0.01,
-      hdop: 1.5 + Math.random() * 0.5, // HDOP between 1.5-2.0
-      timestamp: new Date().toISOString()
-    };
-    
-    console.log('Mock DIMO: Returning location data:', mockLocation);
-    return mockLocation;
+    const clientId = process.env.DIMO_CLIENT_ID;
+    const redirectUri = process.env.DIMO_REDIRECT_URI;
+    const privateKey = process.env.DIMO_API_KEY;
+
+    if (!clientId || !redirectUri || !privateKey) {
+      throw new Error('Missing required DIMO environment variables: DIMO_CLIENT_ID, DIMO_REDIRECT_URI, DIMO_API_KEY');
+    }
+
+    try {
+      console.log('Fetching new Developer JWT with Client ID:', clientId);
+      
+      const developerJwt = await this.dimo.auth.getDeveloperJwt({
+        client_id: clientId,
+        domain: redirectUri,
+        private_key: privateKey
+      });
+
+      // Cache the Developer JWT with 14-day expiration (minus 1 hour for safety)
+      this.developerJwt = developerJwt.access_token;
+      this.developerJwtExpires = new Date(Date.now() + (13 * 24 * 60 * 60 * 1000)); // 13 days
+      
+      console.log('New Developer JWT obtained and cached (expires:', this.developerJwtExpires.toISOString(), ')');
+      return developerJwt;
+    } catch (error) {
+      console.error('Error getting Developer JWT:', error);
+      // Clear cached JWT on error
+      this.developerJwt = null;
+      this.developerJwtExpires = null;
+      throw new Error('Failed to obtain Developer JWT from DIMO. Please verify your API credentials.');
+    }
+  }
+
+  async getVehicleJwt(developerJwt: any, tokenId: number): Promise<any> {
+    // Check if we have a valid cached Vehicle JWT (expires in 10 minutes)
+    const cachedVehicleJwt = this.vehicleJwts.get(tokenId);
+    if (cachedVehicleJwt && cachedVehicleJwt.expires > new Date()) {
+      console.log(`Using cached Vehicle JWT for tokenId: ${tokenId} (expires: ${cachedVehicleJwt.expires.toISOString()})`);
+      return { access_token: cachedVehicleJwt.jwt };
+    }
+
+    try {
+      console.log('Fetching new Vehicle JWT for tokenId:', tokenId);
+      
+      const vehicleJwt = await this.dimo.tokenexchange.getVehicleJwt({
+        ...developerJwt,
+        tokenId: tokenId
+      });
+
+      // Cache the Vehicle JWT with 10-minute expiration (minus 1 minute for safety)
+      const expires = new Date(Date.now() + (9 * 60 * 1000)); // 9 minutes
+      this.vehicleJwts.set(tokenId, {
+        jwt: vehicleJwt.access_token,
+        expires: expires
+      });
+
+      console.log(`New Vehicle JWT obtained and cached for tokenId: ${tokenId} (expires: ${expires.toISOString()})`);
+      return vehicleJwt;
+    } catch (error) {
+      console.error('Error getting Vehicle JWT for tokenId', tokenId, ':', error);
+      // Remove cached JWT on error
+      this.vehicleJwts.delete(tokenId);
+      throw new Error(`Failed to obtain Vehicle JWT for tokenId ${tokenId}. Vehicle may not be shared with this app.`);
+    }
+  }
+
+  async getVehicleLocation(vehicleJwt: any, tokenId: number): Promise<any> {
+    try {
+      console.log('Querying Telemetry API for location data for tokenId:', tokenId);
+      
+      const query = `
+        {
+          signalsLatest(
+            tokenId: ${tokenId}
+          ) {
+            lastSeen
+            currentLocationLatitude {
+              timestamp
+              value
+            }
+            currentLocationLongitude {
+              timestamp
+              value
+            }
+            dimoAftermarketHDOP {
+              timestamp
+              value
+            }
+          }
+        }
+      `;
+
+      const result = await this.dimo.telemetry.query({
+        ...vehicleJwt,
+        query: query
+      });
+
+      console.log('Telemetry API response for tokenId', tokenId, ':', JSON.stringify(result, null, 2));
+      
+      return (result as any)?.data?.signalsLatest || null;
+    } catch (error) {
+      console.error('Error fetching vehicle location for tokenId', tokenId, ':', error);
+      throw new Error(`Failed to fetch vehicle location for tokenId ${tokenId}. Please verify permissions and try again.`);
+    }
   }
 
   async getVehicleTelemetry(vehicleId: string, signals: string[] = []) {
-    console.log(`Mock DIMO: getVehicleTelemetry called for vehicleId: ${vehicleId}, signals:`, signals);
+    console.log(`DIMO SDK: getVehicleTelemetry called for vehicleId: ${vehicleId}, signals:`, signals);
     
-    const tokenId = parseInt(vehicleId);
-    const vehicle = this.mockVehicles.find(v => v.tokenId === tokenId);
-    
-    if (!vehicle) {
-      throw new Error(`Vehicle with tokenId ${tokenId} not found or not accessible`);
+    try {
+      const defaultSignals = [
+        'location.latitude',
+        'location.longitude', 
+        'location.accuracy',
+        'speed',
+        'odometer'
+      ];
+      
+      const requestedSignals = signals.length > 0 ? signals : defaultSignals;
+      
+      const telemetryData = await this.dimo.telemetry.getLatest({
+        tokenId: parseInt(vehicleId),
+        signals: requestedSignals
+      });
+      
+      console.log('DIMO telemetry data:', telemetryData);
+      return telemetryData;
+    } catch (error) {
+      console.error('Error fetching DIMO vehicle telemetry:', error);
+      throw error;
     }
-
-    // Return mock telemetry data
-    const mockTelemetry = {
-      timestamp: new Date().toISOString(),
-      data: {
-        'location.latitude': { value: 40.7128 + (Math.random() - 0.5) * 0.01 },
-        'location.longitude': { value: -74.0060 + (Math.random() - 0.5) * 0.01 },
-        'location.accuracy': { value: 1.5 + Math.random() * 0.5 },
-        'speed': { value: Math.random() * 60 }, // 0-60 mph
-        'odometer': { value: 50000 + Math.random() * 10000 } // 50k-60k miles
-      }
-    };
-    
-    console.log('Mock DIMO: Returning telemetry data:', mockTelemetry);
-    return mockTelemetry;
   }
 }
 
