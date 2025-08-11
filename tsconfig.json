@@ -5,6 +5,7 @@
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
+    "target": "ES2020",
     "module": "ESNext",
     "strict": true,
     "lib": ["esnext", "dom", "dom.iterable"],
@@ -20,7 +21,10 @@
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./client/src/*"],
-      "@shared/*": ["./shared/*"]
+      "@shared/*": ["./shared/*"],
+      "@dimo-network/data-sdk": [
+        "./node_modules/@dimo-network/data-sdk/dist/index.d.ts"
+      ]
     }
   }
 }
