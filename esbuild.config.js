@@ -6,7 +6,7 @@ await build({
   bundle: true,
   platform: 'node',
   target: 'node18',
-  format: 'esm',
+  format: 'cjs',
   outdir: 'dist',
   packages: 'external', // Keep packages external but handle DIMO SDK specially
   external: [
@@ -38,9 +38,8 @@ await build({
     '@babel/*',
     'esbuild',
     '*.node'
+    // DIMO SDK removed from external list to force bundling
   ],
-  // Force bundling of DIMO SDK to resolve ES module issues
-  packages: 'external',
   keepNames: true,
   minify: false,
   define: {
@@ -53,9 +52,19 @@ await build({
   plugins: [{
     name: 'dimo-sdk-resolver',
     setup(build) {
-      // Handle the problematic directory import
+      // Force bundle DIMO SDK instead of treating as external
+      build.onResolve({ filter: /@dimo-network\/data-sdk/ }, args => {
+        return { path: args.path, external: false };
+      });
+      
+      // Handle problematic directory imports by redirecting to main entry
       build.onResolve({ filter: /@dimo-network\/data-sdk\/dist\/api$/ }, args => {
         return { path: '@dimo-network/data-sdk', external: false };
+      });
+      
+      // Handle login-with-dimo package
+      build.onResolve({ filter: /@dimo-network\/login-with-dimo/ }, args => {
+        return { path: args.path, external: false };
       });
     }
   }]
