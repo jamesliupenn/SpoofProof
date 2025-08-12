@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertGpsDataSchema } from "@shared/schema";
 import { z } from "zod";
-import { DimoService } from "./dimo-service";
+import { dimoService } from "./dimo-wrapper";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GPS data routes
@@ -65,7 +65,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userWalletAddress = authHeader.substring(7); // Remove 'Bearer ' prefix
       const clientId = process.env.DIMO_CLIENT_ID || '0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7';
       
-      const dimoService = new DimoService();
       const vehicles = await dimoService.getUserVehicles(userWalletAddress, clientId);
       
       res.json({

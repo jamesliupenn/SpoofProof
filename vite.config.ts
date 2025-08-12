@@ -4,9 +4,6 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 export default defineConfig({
-  define: {
-    global: "globalThis",
-  },
   plugins: [
     react(),
     runtimeErrorOverlay(),
@@ -24,7 +21,6 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
-      "@dimo-network/data-sdk": "@dimo-network/data-sdk/dist/index.js",
     },
   },
   root: path.resolve(import.meta.dirname, "client"),
@@ -37,12 +33,5 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
-  },
-  optimizeDeps: {
-    include: ["@dimo-network/data-sdk"],
-    force: true,
-  },
-  ssr: {
-    noExternal: ["@dimo-network/data-sdk"],
   },
 });
