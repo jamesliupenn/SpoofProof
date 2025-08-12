@@ -130,3 +130,10 @@ Preferred communication style: Simple, everyday language.
   - Visual indicators show when authentication is from cache vs. live DIMO SDK state
   - Seamless integration with existing vehicle query system - cached auth enables vehicle display
   - Cache keys: `dimo_cached_wallet_address` and `dimo_cached_email` stored in localStorage
+- **Real DIMO Data-SDK Integration (August 12, 2025)**: Removed mock wrapper and implemented authentic DIMO SDK
+  - Replaced mock `dimo-wrapper.ts` with real `@dimo-network/data-sdk` implementation
+  - Updated authentication flow to use proper `getDeveloperJwt()` and `tokenexchange.exchange()` methods
+  - Implemented GraphQL queries for vehicle identity and telemetry data using actual DIMO API structure
+  - Fixed vehicle location endpoint to use real JWT authentication with proper privileges [1, 3, 4]
+  - All API calls now use authentic DIMO Production environment with valid API keys
+  - Enhanced error handling and logging for real API interactions

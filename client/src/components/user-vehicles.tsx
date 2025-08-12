@@ -61,7 +61,14 @@ const fetchUserVehicles = async (
 };
 
 const fetchVehicleLocation = async (tokenId: number) => {
-  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`);
+  // Get current wallet address from localStorage for authentication
+  const cachedWallet = localStorage.getItem('dimo_cached_wallet_address');
+  
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`, {
+    headers: {
+      'Authorization': `Bearer ${cachedWallet || ''}`
+    }
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
