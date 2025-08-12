@@ -1,13 +1,12 @@
-// vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "node:path";
+import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-// If you need __dirname in ESM:
-import { fileURLToPath } from "node:url";
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(async ({ ssrBuild }) => ({
+export default defineConfig({
+  define: {
+    global: "globalThis",
+  },
   plugins: [
     react(),
     runtimeErrorOverlay(),
@@ -22,33 +21,28 @@ export default defineConfig(async ({ ssrBuild }) => ({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
-      "@shared": path.resolve(__dirname, "shared"),
-      "@assets": path.resolve(__dirname, "attached_assets"),
-      // Point directly at the SDK’s built entry to avoid ERR_UNSUPPORTED_DIR_IMPORT
-      "@dimo-network/data-sdk": ssrBuild
-        ? path.resolve(
-            __dirname,
-            "node_modules/@dimo-network/data-sdk/dist/index.cjs",
-          )
-        : path.resolve(
-            __dirname,
-            "node_modules/@dimo-network/data-sdk/dist/index.js",
-          ),
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@dimo-network/data-sdk": "@dimo-network/data-sdk/dist/index.js",
     },
-    // (optional) control file extension resolution
-    extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
   },
-  optimizeDeps: {
-    // ensure Vite prebundles the SDK using the alias above
-    include: ["@dimo-network/data-sdk"],
-  },
-  root: path.resolve(__dirname, "client"),
+  root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
   },
   server: {
-    fs: { strict: true, deny: ["**/.*"] },
+    fs: {
+      strict: true,
+      deny: ["**/.*"],
+    },
   },
-}));
+  optimizeDeps: {
+    include: ["@dimo-network/data-sdk"],
+    force: true,
+  },
+  ssr: {
+    noExternal: ["@dimo-network/data-sdk"],
+  },
+});
