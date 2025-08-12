@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertGpsDataSchema } from "@shared/schema";
 import { z } from "zod";
-import { dimoService } from "./dimo-wrapper";
+import { dimoService } from "./dimo-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GPS data routes
@@ -78,39 +78,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get real-time location data for a specific vehicle using token exchange
+  // Get real-time location data for a specific vehicle using DIMO data-sdk
   app.get("/api/dimo/vehicles/:vehicleId/location", async (req, res) => {
     try {
       const { vehicleId } = req.params;
-      const tokenId = parseInt(vehicleId);
+      const authHeader = req.headers.authorization;
       
-      if (!tokenId || isNaN(tokenId)) {
-        res.status(400).json({ message: "Valid tokenId parameter is required" });
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ message: "Missing or invalid authorization token" });
         return;
       }
 
-      console.log('Fetching real-time location for vehicle tokenId:', tokenId);
+      const userToken = authHeader.substring(7);
+      console.log('Fetching real-time location for vehicle:', vehicleId);
       
-      // Step 1: Get Developer JWT
-      const developerJwt = await dimoService.getDeveloperJwt();
-      
-      // Step 2: Get Vehicle JWT using the Developer JWT
-      const vehicleJwt = await dimoService.getVehicleJwt(developerJwt, tokenId);
-      
-      // Step 3: Query telemetry API for location data
-      const locationData = await dimoService.getVehicleLocation(vehicleJwt, tokenId);
-      
-      // Transform the data into GPS format expected by the frontend
-      const gpsData = {
-        lat: locationData?.currentLocationLatitude?.value || 0,
-        lng: locationData?.currentLocationLongitude?.value || 0,
-        hdop: locationData?.dimoAftermarketHDOP?.value || 0,
-        timestamp: locationData?.lastSeen || new Date().toISOString(),
-        tokenId: tokenId
-      };
+      // Use the real DIMO service to get vehicle location
+      const locationData = await dimoService.getVehicleLocation(vehicleId, userToken);
       
       // Automatically save to GPS storage for visualization
-      const savedData = await storage.saveGpsData(gpsData);
+      const savedData = await storage.saveGpsData(locationData);
       
       res.json(savedData);
     } catch (error) {

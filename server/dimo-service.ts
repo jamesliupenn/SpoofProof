@@ -5,11 +5,43 @@ export class DimoService {
   private dimo: DIMO;
 
   constructor() {
-    this.dimo = new DIMO('Production'); // Use Production environment
+    // Initialize DIMO SDK for Production environment
+    this.dimo = new DIMO('Production');
+  }
+
+  // Get Developer JWT for authentication
+  async getDeveloperJwt() {
+    try {
+      return await this.dimo.auth.getDeveloperJwt({
+        client_id: process.env.DIMO_CLIENT_ID!,
+        domain: process.env.DIMO_REDIRECT_URI || 'http://localhost:5000',
+        private_key: process.env.DIMO_API_KEY!
+      });
+    } catch (error) {
+      console.error('Error getting Developer JWT:', error);
+      throw error;
+    }
+  }
+
+  // Get Vehicle JWT for specific vehicle access
+  async getVehicleJwt(developerJwt: any, tokenId: number) {
+    try {
+      return await this.dimo.tokenexchange.exchange({
+        ...developerJwt,
+        privileges: [1, 3, 4], // Standard privileges for vehicle data access
+        tokenId: tokenId.toString()
+      });
+    } catch (error) {
+      console.error('Error getting Vehicle JWT:', error);
+      throw error;
+    }
   }
 
   async getUserVehicles(userWalletAddress: string, clientId: string) {
     try {
+      // Get Developer JWT first
+      const developerJwt = await this.getDeveloperJwt();
+
       // Query vehicles that the user owns and are privileged to the client ID
       const query = `{
         vehicles(
@@ -32,7 +64,8 @@ export class DimoService {
         query: query
       });
 
-      return response.data?.vehicles || { nodes: [] };
+      console.log('DIMO Identity API response:', response);
+      return response?.data?.vehicles || { nodes: [] };
     } catch (error) {
       console.error('Error fetching DIMO vehicles:', error);
       throw error;
@@ -55,16 +88,45 @@ export class DimoService {
 
   async getVehicleLocation(vehicleId: string, userToken: string) {
     try {
-      // Get latest telemetry data for the vehicle
-      const telemetryData = await this.dimo.telemetry.getLatest({
-        tokenId: parseInt(vehicleId),
-        signals: ['location.latitude', 'location.longitude', 'location.accuracy']
+      const tokenId = parseInt(vehicleId);
+      
+      // Get Developer JWT and Vehicle JWT
+      const developerJwt = await this.getDeveloperJwt();
+      const vehicleJwt = await this.getVehicleJwt(developerJwt, tokenId);
+
+      // Query telemetry API for latest location data
+      const query = `
+        query GetSignalsLatest($tokenId: Int!) {
+          signalsLatest(tokenId: $tokenId) {
+            currentLocationLatitude {
+              timestamp
+              value
+            }
+            currentLocationLongitude {
+              timestamp
+              value
+            }
+            dimoAftermarketHDOP {
+              timestamp
+              value
+            }
+            lastSeen
+          }
+        }
+      `;
+
+      const locationData = await this.dimo.telemetry.query({
+        ...vehicleJwt,
+        query: query,
+        variables: { tokenId: tokenId }
       });
 
-      // Extract location data
-      const latitude = telemetryData.data?.['location.latitude']?.value;
-      const longitude = telemetryData.data?.['location.longitude']?.value;
-      const accuracy = telemetryData.data?.['location.accuracy']?.value;
+      console.log('DIMO Telemetry API response:', locationData);
+
+      const signalsData = locationData?.data?.signalsLatest;
+      const latitude = signalsData?.currentLocationLatitude?.value;
+      const longitude = signalsData?.currentLocationLongitude?.value;
+      const hdop = signalsData?.dimoAftermarketHDOP?.value;
 
       if (!latitude || !longitude) {
         throw new Error('No location data available for this vehicle');
@@ -74,8 +136,8 @@ export class DimoService {
       return {
         lat: parseFloat(latitude),
         lng: parseFloat(longitude),
-        hdop: accuracy ? parseFloat(accuracy) : 1.0, // Use accuracy as HDOP if available
-        timestamp: telemetryData.timestamp || new Date().toISOString()
+        hdop: hdop ? parseFloat(hdop) : 1.0,
+        timestamp: signalsData?.lastSeen || new Date().toISOString()
       };
     } catch (error) {
       console.error('Error fetching DIMO vehicle location:', error);
