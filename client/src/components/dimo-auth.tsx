@@ -17,29 +17,19 @@ export default function DimoAuth() {
   const handleShareSuccess = (authData: any) => {
     console.log("DIMO vehicle sharing successful:", authData);
     
-    // Extract wallet address from token if available
-    if (authData?.token) {
-      try {
-        // Decode JWT token to get wallet address
-        const tokenPayload = JSON.parse(atob(authData.token.split('.')[1]));
-        const walletAddress = tokenPayload.sub; // Subject typically contains wallet address
-        
-        if (walletAddress) {
-          console.log('Manually caching wallet from token:', walletAddress);
-          localStorage.setItem('dimo_cached_wallet_address', walletAddress);
-          
-          // Optionally cache email if available in token payload
-          if (tokenPayload.email) {
-            localStorage.setItem('dimo_cached_email', tokenPayload.email);
-          }
-          
-          // Force re-render by triggering a storage event
-          window.dispatchEvent(new Event('storage'));
-        }
-      } catch (error) {
-        console.error('Failed to decode token:', error);
-      }
+    // Cache wallet address and token directly from authData
+    if (authData?.walletAddress) {
+      console.log('Caching wallet address from authData:', authData.walletAddress);
+      localStorage.setItem('dimo_cached_wallet_address', authData.walletAddress);
     }
+    
+    if (authData?.token) {
+      console.log('Caching token from authData');
+      localStorage.setItem('dimo_cached_token', authData.token);
+    }
+    
+    // Force re-render by triggering a storage event
+    window.dispatchEvent(new Event('storage'));
     
     console.log('Shared vehicles:', authData?.sharedVehicles || 'none');
     // In redirect mode, the redirect happens automatically
