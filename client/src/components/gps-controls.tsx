@@ -54,7 +54,7 @@ export default function GpsControls({ gpsData, onGpsDataChange, testScenarios }:
             GPS Controls
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           <div>
             <Label htmlFor="latitude" className="text-sm font-medium text-slate-700">
               Latitude
@@ -128,7 +128,7 @@ export default function GpsControls({ gpsData, onGpsDataChange, testScenarios }:
             Test Scenarios
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2">
           {testScenarios.map((scenario, index) => {
             const getScenarioEmoji = (description: string) => {
               if (description.toLowerCase().includes('offline')) return '📵';

@@ -53,7 +53,7 @@ export default function GpsStatus({ gpsStatus, gpsData }: GpsStatusProps) {
           GPS Status
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         <div className="flex items-center space-x-3">
           <div className={`w-4 h-4 ${getStatusColor()} rounded-full`} data-testid="status-indicator" />
           <div>
@@ -66,7 +66,7 @@ export default function GpsStatus({ gpsStatus, gpsData }: GpsStatusProps) {
           </div>
         </div>
         
-        <div className="bg-slate-50 rounded-lg p-3">
+        <div className="bg-slate-50 rounded-lg p-2">
           <div className="text-xs font-medium text-slate-600 uppercase tracking-wide mb-2">
             Current Position
           </div>

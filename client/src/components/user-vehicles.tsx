@@ -274,11 +274,11 @@ export default function UserVehicles() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {vehicles.map((vehicle) => (
               <div
                 key={vehicle.tokenId}
-                className="border rounded-lg p-4 space-y-3"
+                className="border rounded-lg p-3 space-y-2"
                 data-testid={`vehicle-card-${vehicle.tokenId}`}
               >
                 <div className="flex justify-between items-start">
@@ -325,7 +325,7 @@ export default function UserVehicles() {
                 </div>
 
                 {vehicle.sacds?.nodes && vehicle.sacds.nodes.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <h4 className="text-sm font-medium flex items-center gap-1">
                       <Shield className="h-4 w-4" />
                       Permissions
@@ -333,7 +333,7 @@ export default function UserVehicles() {
                     {vehicle.sacds?.nodes?.map((sacd, index) => (
                       <div
                         key={index}
-                        className="bg-muted/50 rounded p-3 text-sm"
+                        className="bg-muted/50 rounded p-2 text-sm"
                       >
                         <div className="flex flex-wrap gap-1 mb-2">
                           <Badge variant="outline" className="text-xs">

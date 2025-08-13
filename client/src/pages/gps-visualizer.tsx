@@ -187,7 +187,7 @@ export default function GpsVisualizer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6 min-h-[calc(100vh-8rem)]">
           {/* Control Panel */}
-          <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
+          <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
             <div className="hidden lg:block">
               <GpsStatus gpsStatus={gpsStatus} gpsData={gpsData} />
             </div>
