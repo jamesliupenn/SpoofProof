@@ -62,7 +62,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const userWalletAddress = authHeader.substring(7); // Remove 'Bearer ' prefix
+      const userToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+      const userWalletAddress = req.query.walletAddress as string;
+      
+      if (!userWalletAddress) {
+        res.status(400).json({ message: "Missing walletAddress parameter" });
+        return;
+      }
+      
       const clientId = process.env.DIMO_CLIENT_ID || '0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7';
       
       const vehicles = await dimoService.getUserVehicles(userWalletAddress, clientId);
@@ -90,7 +97,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userToken = authHeader.substring(7);
-      console.log('Fetching real-time location for vehicle:', vehicleId);
+      const userWalletAddress = req.query.walletAddress as string;
+      
+      if (!userWalletAddress) {
+        res.status(400).json({ message: "Missing walletAddress parameter" });
+        return;
+      }
+      
+      console.log('Fetching real-time location for vehicle:', vehicleId, 'for wallet:', userWalletAddress);
       
       // Use the real DIMO service to get vehicle location
       const locationData = await dimoService.getVehicleLocation(vehicleId, userToken);
