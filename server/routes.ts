@@ -43,15 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test scenarios endpoint
-  app.get("/api/gps/test-scenarios", (req, res) => {
-    const testScenarios = [
-      { lat: 0, lng: 0, hdop: 0, description: "Vehicle Offline" },
-      { lat: 40.7538, lng: -73.9878, hdop: 15, description: "Urban Garage" },
-      { lat: 40.658878, lng: -74.186740, hdop: 1.5, description: "Open Road" },
-    ];
-    res.json(testScenarios);
-  });
+
 
   // DIMO API routes - require user authentication token
   app.get("/api/dimo/vehicles", async (req, res) => {
