@@ -28,7 +28,7 @@ export class DimoService {
     try {
       return await this.dimo.tokenexchange.exchange({
         ...developerJwt,
-        privileges: [4],
+        privileges: [1, 3, 4, 5, 6],
         tokenId: tokenId,
       });
     } catch (error) {
