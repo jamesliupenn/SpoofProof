@@ -58,7 +58,7 @@ function getCookieValue(cookieName: string): string | null {
 const fetchUserVehicles = async (
   walletAddress: string,
 ): Promise<SharedVehiclesResponse> => {
-  const cachedToken = localStorage.getItem('dimo_cached_token');
+  const cachedToken = getCookieValue('dimo_auth_token');
   
   if (!cachedToken) {
     throw new Error('No cached DIMO token found. Please authenticate first.');
@@ -79,7 +79,7 @@ const fetchUserVehicles = async (
 
 const fetchVehicleLocation = async (tokenId: number) => {
   // Get cached token from localStorage
-  const cachedToken = localStorage.getItem('dimo_cached_token');
+  const cachedToken = getCookieValue('dimo_auth_token');
   
   if (!cachedToken) {
     throw new Error('No cached DIMO token found. Please authenticate first.');

@@ -142,3 +142,11 @@ Preferred communication style: Simple, everyday language.
   - Migrated to preferred `getVehicleJwt()` function for simplified Vehicle JWT exchange
   - Maintained compatibility with existing authentication flow and API structure
   - Enhanced with latest SDK improvements including streamlined token exchange and better error handling
+- **Token-Based Authentication & Caching System (August 13, 2025)**: Implemented comprehensive token caching
+  - Fixed wallet address caching in localStorage using `dimo_cached_wallet_address` and `dimo_cached_token` keys
+  - Updated `handleShareSuccess` to extract and cache `walletAddress` and `token` directly from authData
+  - Modified API endpoints to use cached token as Bearer authorization header instead of wallet address
+  - Updated `/api/dimo/vehicles` to accept token in Authorization header and walletAddress as URL parameter
+  - Simplified `/api/dimo/vehicles/:id/location` to only require cached token (removed wallet parameter)
+  - Enhanced storage event system for immediate UI updates after successful authentication
+  - Fixed TypeScript errors and improved error handling for missing cached tokens
