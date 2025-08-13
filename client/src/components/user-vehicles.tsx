@@ -44,6 +44,17 @@ interface SharedVehiclesResponse {
   count: number;
 }
 
+function getCookieValue(cookieName: string): string | null {
+  const cookies = document.cookie.split("; ");
+  for (let cookie of cookies) {
+    const [name, value] = cookie.split("=");
+    if (name === cookieName) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null; // Return null if the cookie is not found
+}
+
 const fetchUserVehicles = async (
   walletAddress: string,
 ): Promise<SharedVehiclesResponse> => {
@@ -89,14 +100,18 @@ const fetchVehicleLocation = async (tokenId: number) => {
 };
 
 export default function UserVehicles() {
-  const { isAuthenticated, walletAddress, email, isFromCache } = useCachedDimoAuth();
+  const { isAuthenticated, walletAddress, email, isFromCache } =
+    useCachedDimoAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/dimo/vehicles", walletAddress],
     queryFn: () => {
-      console.log('Frontend: Making API call to fetch vehicles for wallet:', walletAddress);
+      console.log(
+        "Frontend: Making API call to fetch vehicles for wallet:",
+        walletAddress,
+      );
       return fetchUserVehicles(walletAddress!);
     },
     enabled: isAuthenticated && !!walletAddress,
@@ -104,20 +119,23 @@ export default function UserVehicles() {
 
   // Log query state changes
   useEffect(() => {
-    console.log('UserVehicles query state update:', { 
-      isAuthenticated, 
-      walletAddress, 
-      isLoading, 
+    console.log("UserVehicles query state update:", {
+      isAuthenticated,
+      walletAddress,
+      isLoading,
       error: error?.message,
       data,
-      queryEnabled: isAuthenticated && !!walletAddress 
+      queryEnabled: isAuthenticated && !!walletAddress,
     });
   }, [isAuthenticated, walletAddress, isLoading, error, data]);
-  
+
   // Also log the final authentication status for the user
-  console.log('UserVehicles render - Final auth state:', { isAuthenticated, walletAddress, isFromCache, vehicleCount: data?.vehicles?.length || 0 });
-
-
+  console.log("UserVehicles render - Final auth state:", {
+    isAuthenticated,
+    walletAddress,
+    isFromCache,
+    vehicleCount: data?.vehicles?.length || 0,
+  });
 
   const locationMutation = useMutation({
     mutationFn: fetchVehicleLocation,
@@ -230,8 +248,13 @@ export default function UserVehicles() {
         </CardTitle>
         <CardDescription>
           {vehicles.length > 0
-            ? `${vehicles.length} vehicle${vehicles.length > 1 ? "s" : ""} shared` : "No vehicles currently shared"}
-          {isFromCache && <span className="text-orange-500 text-xs ml-2">(using cached auth)</span>}
+            ? `${vehicles.length} vehicle${vehicles.length > 1 ? "s" : ""} shared`
+            : "No vehicles currently shared"}
+          {isFromCache && (
+            <span className="text-orange-500 text-xs ml-2">
+              (using cached auth)
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -240,9 +263,9 @@ export default function UserVehicles() {
             <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">No vehicles shared yet</p>
             <p className="text-xs mt-1">
-              Use the "Share Vehicles" button above to grant this app access to your vehicle data
+              Use the "Share Vehicles" button above to grant this app access to
+              your vehicle data
             </p>
-
           </div>
         ) : (
           <div className="space-y-4">
