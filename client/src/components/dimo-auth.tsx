@@ -10,9 +10,20 @@ import { useCachedDimoAuth } from "@/hooks/use-cached-auth";
 export default function DimoAuth() {
   const { isAuthenticated, email, walletAddress, isFromCache } = useCachedDimoAuth();
   const dimoSdkState = useDimoAuthState();
+  
+  // Debug: Log raw DIMO SDK state
+  console.log('DimoAuth - Raw DIMO SDK state:', dimoSdkState);
 
   const handleShareSuccess = (authData: any) => {
     console.log("DIMO vehicle sharing successful:", authData);
+    // Manually cache the wallet address if provided in auth data
+    if (authData?.walletAddress) {
+      console.log('Manually caching wallet from success callback:', authData.walletAddress);
+      localStorage.setItem('dimo_cached_wallet_address', authData.walletAddress);
+      if (authData.email) {
+        localStorage.setItem('dimo_cached_email', authData.email);
+      }
+    }
     // In redirect mode, the redirect happens automatically
     // This callback is for handling the returned data
   };
