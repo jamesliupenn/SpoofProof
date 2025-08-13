@@ -62,23 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const dimoToken = authHeader.substring(7); // Remove 'Bearer ' prefix
-      
-      // Decode JWT token to get wallet address
-      let userWalletAddress: string;
-      try {
-        const tokenPayload = JSON.parse(Buffer.from(dimoToken.split('.')[1], 'base64').toString());
-        userWalletAddress = tokenPayload.sub;
-        
-        if (!userWalletAddress) {
-          res.status(401).json({ message: "Invalid token: no wallet address found" });
-          return;
-        }
-      } catch (decodeError) {
-        res.status(401).json({ message: "Invalid token format" });
-        return;
-      }
-      
+      const userWalletAddress = authHeader.substring(7); // Remove 'Bearer ' prefix
       const clientId = process.env.DIMO_CLIENT_ID || '0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7';
       
       const vehicles = await dimoService.getUserVehicles(userWalletAddress, clientId);
@@ -105,27 +89,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const dimoToken = authHeader.substring(7);
-      
-      // Decode JWT token to get wallet address
-      let userWalletAddress: string;
-      try {
-        const tokenPayload = JSON.parse(Buffer.from(dimoToken.split('.')[1], 'base64').toString());
-        userWalletAddress = tokenPayload.sub;
-        
-        if (!userWalletAddress) {
-          res.status(401).json({ message: "Invalid token: no wallet address found" });
-          return;
-        }
-      } catch (decodeError) {
-        res.status(401).json({ message: "Invalid token format" });
-        return;
-      }
-      
-      console.log('Fetching real-time location for vehicle:', vehicleId, 'for wallet:', userWalletAddress);
+      const userToken = authHeader.substring(7);
+      console.log('Fetching real-time location for vehicle:', vehicleId);
       
       // Use the real DIMO service to get vehicle location
-      const locationData = await dimoService.getVehicleLocation(vehicleId, userWalletAddress);
+      const locationData = await dimoService.getVehicleLocation(vehicleId, userToken);
       
       // Automatically save to GPS storage for visualization
       const savedData = await storage.saveGpsData(locationData);
@@ -149,24 +117,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const dimoToken = authHeader.substring(7);
-      
-      // Decode JWT token to get wallet address
-      let userWalletAddress: string;
-      try {
-        const tokenPayload = JSON.parse(Buffer.from(dimoToken.split('.')[1], 'base64').toString());
-        userWalletAddress = tokenPayload.sub;
-        
-        if (!userWalletAddress) {
-          res.status(401).json({ message: "Invalid token: no wallet address found" });
-          return;
-        }
-      } catch (decodeError) {
-        res.status(401).json({ message: "Invalid token format" });
-        return;
-      }
-      
-      const vehicleData = await dimoService.getVehicleData(vehicleId, userWalletAddress);
+      const userToken = authHeader.substring(7);
+      const vehicleData = await dimoService.getVehicleData(vehicleId, userToken);
       res.json(vehicleData);
     } catch (error) {
       console.error('Error fetching DIMO vehicle data:', error);

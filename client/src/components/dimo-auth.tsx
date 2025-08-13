@@ -17,31 +17,33 @@ export default function DimoAuth() {
   const handleShareSuccess = (authData: any) => {
     console.log("DIMO vehicle sharing successful:", authData);
     
-    // Cache the JWT token for API authentication
+    // Extract wallet address from token if available
     if (authData?.token) {
-      console.log('Caching DIMO token for API calls');
-      localStorage.setItem('dimo_auth_token', authData.token);
-      
-      // Extract wallet address from token for display
       try {
+        // Decode JWT token to get wallet address
         const tokenPayload = JSON.parse(atob(authData.token.split('.')[1]));
-        const walletAddress = tokenPayload.sub;
+        const walletAddress = tokenPayload.sub; // Subject typically contains wallet address
         
         if (walletAddress) {
+          console.log('Manually caching wallet from token:', walletAddress);
           localStorage.setItem('dimo_cached_wallet_address', walletAddress);
+          
+          // Optionally cache email if available in token payload
           if (tokenPayload.email) {
             localStorage.setItem('dimo_cached_email', tokenPayload.email);
           }
+          
+          // Force re-render by triggering a storage event
+          window.dispatchEvent(new Event('storage'));
         }
       } catch (error) {
         console.error('Failed to decode token:', error);
       }
-      
-      // Force re-render by triggering a storage event
-      window.dispatchEvent(new Event('storage'));
     }
     
     console.log('Shared vehicles:', authData?.sharedVehicles || 'none');
+    // In redirect mode, the redirect happens automatically
+    // This callback is for handling the returned data
   };
 
   const handleShareError = (error: any) => {
@@ -50,9 +52,8 @@ export default function DimoAuth() {
 
   const handleLogoutSuccess = () => {
     console.log("DIMO logout successful");
-    // Clear all cached data on logout
+    // Clear cached wallet address on logout
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('dimo_auth_token');
       localStorage.removeItem('dimo_cached_wallet_address');
       localStorage.removeItem('dimo_cached_email');
     }
