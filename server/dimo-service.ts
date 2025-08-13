@@ -1,4 +1,4 @@
-import { DIMO } from '@dimo-network/data-sdk';
+import { DIMO } from "@dimo-network/data-sdk";
 
 // DIMO data service using official SDK
 export class DimoService {
@@ -6,7 +6,7 @@ export class DimoService {
 
   constructor() {
     // Initialize DIMO SDK for Production environment
-    this.dimo = new DIMO('Production');
+    this.dimo = new DIMO("Production");
   }
 
   // Get Developer JWT for authentication
@@ -14,11 +14,11 @@ export class DimoService {
     try {
       return await this.dimo.auth.getDeveloperJwt({
         client_id: process.env.DIMO_CLIENT_ID!,
-        domain: process.env.DIMO_REDIRECT_URI || 'http://localhost:5000',
-        private_key: process.env.DIMO_API_KEY!
+        domain: process.env.DIMO_REDIRECT_URI || "http://localhost:5000",
+        private_key: process.env.DIMO_API_KEY!,
       });
     } catch (error) {
-      console.error('Error getting Developer JWT:', error);
+      console.error("Error getting Developer JWT:", error);
       throw error;
     }
   }
@@ -28,12 +28,12 @@ export class DimoService {
     try {
       return await this.dimo.tokenexchange.getVehicleJwt({
         headers: {
-          Authorization: `Bearer ${developerJwt.access_token}`
+          Authorization: `Bearer ${developerJwt.access_token}`,
         },
-        tokenId: tokenId
+        tokenId: tokenId,
       });
     } catch (error) {
-      console.error('Error getting Vehicle JWT:', error);
+      console.error("Error getting Vehicle JWT:", error);
       throw error;
     }
   }
@@ -62,13 +62,13 @@ export class DimoService {
       }`;
 
       const response = await this.dimo.identity.query({
-        query: query
+        query: query,
       });
 
-      console.log('DIMO Identity API response:', response);
+      console.log("DIMO Identity API response:", response);
       return response?.data?.vehicles || { nodes: [] };
     } catch (error) {
-      console.error('Error fetching DIMO vehicles:', error);
+      console.error("Error fetching DIMO vehicles:", error);
       throw error;
     }
   }
@@ -77,12 +77,12 @@ export class DimoService {
     try {
       // Get vehicle information using the data SDK
       const vehicleData = await this.dimo.identity.getVehicle({
-        tokenId: parseInt(vehicleId)
+        tokenId: parseInt(vehicleId),
       });
-      
+
       return vehicleData;
     } catch (error) {
-      console.error('Error fetching DIMO vehicle data:', error);
+      console.error("Error fetching DIMO vehicle data:", error);
       throw error;
     }
   }
@@ -90,15 +90,15 @@ export class DimoService {
   async getVehicleLocation(vehicleId: string, userToken: string) {
     try {
       const tokenId = parseInt(vehicleId);
-      
+
       // Get Developer JWT and Vehicle JWT
       const developerJwt = await this.getDeveloperJwt();
       const vehicleJwt = await this.getVehicleJwt(developerJwt, tokenId);
 
       // Query telemetry API for latest location data
       const query = `
-        query GetSignalsLatest($tokenId: Int!) {
-          signalsLatest(tokenId: $tokenId) {
+        {
+          signalsLatest(tokenId: ${tokenId}) {
             currentLocationLatitude {
               timestamp
               value
@@ -119,10 +119,9 @@ export class DimoService {
       const locationData = await this.dimo.telemetry.query({
         ...vehicleJwt,
         query: query,
-        variables: { tokenId: tokenId }
       });
 
-      console.log('DIMO Telemetry API response:', locationData);
+      console.log("DIMO Telemetry API response:", locationData);
 
       const signalsData = locationData?.data?.signalsLatest;
       const latitude = signalsData?.currentLocationLatitude?.value;
@@ -130,7 +129,7 @@ export class DimoService {
       const hdop = signalsData?.dimoAftermarketHDOP?.value;
 
       if (!latitude || !longitude) {
-        throw new Error('No location data available for this vehicle');
+        throw new Error("No location data available for this vehicle");
       }
 
       // Convert to GPS format for your app
@@ -138,10 +137,10 @@ export class DimoService {
         lat: parseFloat(latitude),
         lng: parseFloat(longitude),
         hdop: hdop ? parseFloat(hdop) : 1.0,
-        timestamp: signalsData?.lastSeen || new Date().toISOString()
+        timestamp: signalsData?.lastSeen || new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error fetching DIMO vehicle location:', error);
+      console.error("Error fetching DIMO vehicle location:", error);
       throw error;
     }
   }
@@ -150,23 +149,23 @@ export class DimoService {
     try {
       // Get telemetry data for specified signals
       const defaultSignals = [
-        'location.latitude',
-        'location.longitude', 
-        'location.accuracy',
-        'speed',
-        'odometer'
+        "location.latitude",
+        "location.longitude",
+        "location.accuracy",
+        "speed",
+        "odometer",
       ];
-      
+
       const requestedSignals = signals.length > 0 ? signals : defaultSignals;
-      
+
       const telemetryData = await this.dimo.telemetry.getLatest({
         tokenId: parseInt(vehicleId),
-        signals: requestedSignals
+        signals: requestedSignals,
       });
-      
+
       return telemetryData;
     } catch (error) {
-      console.error('Error fetching DIMO vehicle telemetry:', error);
+      console.error("Error fetching DIMO vehicle telemetry:", error);
       throw error;
     }
   }
