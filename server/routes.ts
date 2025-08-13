@@ -97,14 +97,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userToken = authHeader.substring(7);
-      const userWalletAddress = req.query.walletAddress as string;
       
-      if (!userWalletAddress) {
-        res.status(400).json({ message: "Missing walletAddress parameter" });
-        return;
-      }
-      
-      console.log('Fetching real-time location for vehicle:', vehicleId, 'for wallet:', userWalletAddress);
+      console.log('Fetching real-time location for vehicle:', vehicleId);
       
       // Use the real DIMO service to get vehicle location
       const locationData = await dimoService.getVehicleLocation(vehicleId, userToken);

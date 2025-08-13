@@ -78,15 +78,14 @@ const fetchUserVehicles = async (
 };
 
 const fetchVehicleLocation = async (tokenId: number) => {
-  // Get cached token and wallet address from localStorage
+  // Get cached token from localStorage
   const cachedToken = localStorage.getItem('dimo_cached_token');
-  const cachedWallet = localStorage.getItem('dimo_cached_wallet_address');
   
   if (!cachedToken) {
     throw new Error('No cached DIMO token found. Please authenticate first.');
   }
   
-  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location?walletAddress=${encodeURIComponent(cachedWallet || '')}`, {
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`, {
     headers: {
       'Authorization': `Bearer ${cachedToken}`
     }
