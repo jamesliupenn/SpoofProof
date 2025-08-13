@@ -36,14 +36,23 @@ export function useCachedDimoAuth(): CachedAuthState {
     isInitialized
   });
 
-  // Load cached data on mount
+  // Load cached data on mount and listen for storage changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(CACHED_WALLET_KEY);
-      const cachedEmailData = localStorage.getItem(CACHED_EMAIL_KEY);
-      setCachedWalletAddress(cached);
-      setCachedEmail(cachedEmailData);
-      setIsInitialized(true);
+      const loadCachedData = () => {
+        const cached = localStorage.getItem(CACHED_WALLET_KEY);
+        const cachedEmailData = localStorage.getItem(CACHED_EMAIL_KEY);
+        setCachedWalletAddress(cached);
+        setCachedEmail(cachedEmailData);
+        setIsInitialized(true);
+      };
+      
+      loadCachedData();
+      
+      // Listen for storage events to update cache when modified externally
+      window.addEventListener('storage', loadCachedData);
+      
+      return () => window.removeEventListener('storage', loadCachedData);
     }
   }, []);
 
