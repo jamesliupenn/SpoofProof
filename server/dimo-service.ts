@@ -23,13 +23,12 @@ export class DimoService {
     }
   }
 
-  // Get Vehicle JWT for specific vehicle access
+  // Get Vehicle JWT for specific vehicle access (using new preferred method)
   async getVehicleJwt(developerJwt: any, tokenId: number) {
     try {
-      return await this.dimo.tokenexchange.exchange({
+      return await this.dimo.tokenexchange.getVehicleJwt({
         ...developerJwt,
-        privileges: [1, 3, 4], // Standard privileges for vehicle data access
-        tokenId: tokenId.toString()
+        tokenId: tokenId
       });
     } catch (error) {
       console.error('Error getting Vehicle JWT:', error);

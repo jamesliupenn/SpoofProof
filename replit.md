@@ -137,3 +137,8 @@ Preferred communication style: Simple, everyday language.
   - Fixed vehicle location endpoint to use real JWT authentication with proper privileges [1, 3, 4]
   - All API calls now use authentic DIMO Production environment with valid API keys
   - Enhanced error handling and logging for real API interactions
+- **DIMO SDK Update to v1.3.2 (August 13, 2025)**: Updated to latest DIMO data-sdk version
+  - Upgraded from previous version to @dimo-network/data-sdk@1.3.2 with latest features
+  - Migrated to preferred `getVehicleJwt()` function for simplified Vehicle JWT exchange
+  - Maintained compatibility with existing authentication flow and API structure
+  - Enhanced with latest SDK improvements including streamlined token exchange and better error handling
