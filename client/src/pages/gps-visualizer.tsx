@@ -71,7 +71,17 @@ export default function GpsVisualizer() {
   // Listen for focus location events from vehicle location fetches
   useEffect(() => {
     const handleFocusLocation = (event: CustomEvent) => {
-      setFocusLocation(event.detail);
+      const { lat, lng, hdop } = event.detail;
+      
+      // Update GPS data with vehicle location data
+      setGpsData({ lat, lng, hdop });
+      
+      // Update last known location
+      setLastKnownLocation({ lat, lng });
+      
+      // Set focus location for map centering
+      setFocusLocation({ lat, lng });
+      
       // Clear focus location after a short delay to allow map to center
       setTimeout(() => setFocusLocation(null), 100);
     };

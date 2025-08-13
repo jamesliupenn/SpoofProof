@@ -147,11 +147,15 @@ export default function UserVehicles() {
         // Invalidate GPS data to trigger a refresh of the map
         queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
 
-        // Notify parent component to focus on the new location
+        // Notify parent component to focus on the new location and update GPS data
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("focusMapLocation", {
-              detail: { lat: locationData.lat, lng: locationData.lng },
+              detail: { 
+                lat: locationData.lat, 
+                lng: locationData.lng, 
+                hdop: locationData.hdop || 1.0 
+              },
             }),
           );
         }
