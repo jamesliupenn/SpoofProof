@@ -44,12 +44,17 @@ interface SharedVehiclesResponse {
   count: number;
 }
 
-const fetchUserVehicles = async (
-  walletAddress: string,
-): Promise<SharedVehiclesResponse> => {
+const fetchUserVehicles = async (): Promise<SharedVehiclesResponse> => {
+  // Get cached DIMO token for authentication
+  const dimoToken = localStorage.getItem('dimo_auth_token');
+  
+  if (!dimoToken) {
+    throw new Error('No DIMO authentication token found');
+  }
+
   const response = await fetch('/api/dimo/vehicles', {
     headers: {
-      'Authorization': `Bearer ${walletAddress}`
+      'Authorization': `Bearer ${dimoToken}`
     }
   });
 
@@ -61,12 +66,16 @@ const fetchUserVehicles = async (
 };
 
 const fetchVehicleLocation = async (tokenId: number) => {
-  // Get current wallet address from localStorage for authentication
-  const cachedWallet = localStorage.getItem('dimo_cached_wallet_address');
+  // Get cached DIMO token for authentication
+  const dimoToken = localStorage.getItem('dimo_auth_token');
+  
+  if (!dimoToken) {
+    throw new Error('No DIMO authentication token found');
+  }
   
   const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`, {
     headers: {
-      'Authorization': `Bearer ${cachedWallet || ''}`
+      'Authorization': `Bearer ${dimoToken}`
     }
   });
 
@@ -83,12 +92,12 @@ export default function UserVehicles() {
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/dimo/vehicles", walletAddress],
+    queryKey: ["/api/dimo/vehicles"],
     queryFn: () => {
-      console.log('Frontend: Making API call to fetch vehicles for wallet:', walletAddress);
-      return fetchUserVehicles(walletAddress!);
+      console.log('Frontend: Making API call to fetch vehicles with DIMO token');
+      return fetchUserVehicles();
     },
-    enabled: isAuthenticated && !!walletAddress,
+    enabled: isAuthenticated,
   });
 
   // Log query state changes
