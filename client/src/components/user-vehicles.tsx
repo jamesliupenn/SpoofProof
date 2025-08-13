@@ -58,17 +58,20 @@ function getCookieValue(cookieName: string): string | null {
 const fetchUserVehicles = async (
   walletAddress: string,
 ): Promise<SharedVehiclesResponse> => {
-  const cachedToken = getCookieValue('dimo_auth_token');
-  
+  const cachedToken = getCookieValue("dimo_auth_token");
+
   if (!cachedToken) {
-    throw new Error('No cached DIMO token found. Please authenticate first.');
+    throw new Error("No cached DIMO token found. Please authenticate first.");
   }
 
-  const response = await fetch(`/api/dimo/vehicles?walletAddress=${encodeURIComponent(walletAddress)}`, {
-    headers: {
-      'Authorization': `Bearer ${cachedToken}`
-    }
-  });
+  const response = await fetch(
+    `/api/dimo/vehicles?walletAddress=${encodeURIComponent(walletAddress)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${cachedToken}`,
+      },
+    },
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch vehicles: ${response.statusText}`);
@@ -79,16 +82,16 @@ const fetchUserVehicles = async (
 
 const fetchVehicleLocation = async (tokenId: number) => {
   // Get cached token from localStorage
-  const cachedToken = getCookieValue('dimo_auth_token');
-  
+  const cachedToken = getCookieValue("dimo_auth_token");
+
   if (!cachedToken) {
-    throw new Error('No cached DIMO token found. Please authenticate first.');
+    throw new Error("No cached DIMO token found. Please authenticate first.");
   }
-  
+
   const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`, {
     headers: {
-      'Authorization': `Bearer ${cachedToken}`
-    }
+      Authorization: `Bearer ${cachedToken}`,
+    },
   });
 
   if (!response.ok) {
@@ -151,10 +154,10 @@ export default function UserVehicles() {
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("focusMapLocation", {
-              detail: { 
-                lat: locationData.lat, 
-                lng: locationData.lng, 
-                hdop: locationData.hdop || 1.0 
+              detail: {
+                lat: locationData.lat,
+                lng: locationData.lng,
+                hdop: locationData.hdop || 1.0,
               },
             }),
           );
@@ -184,7 +187,7 @@ export default function UserVehicles() {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Car className="h-5 w-5" />
             My Shared Vehicles
           </CardTitle>
@@ -203,7 +206,7 @@ export default function UserVehicles() {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Car className="h-5 w-5" />
             My Shared Vehicles
           </CardTitle>
@@ -245,7 +248,7 @@ export default function UserVehicles() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <Car className="h-5 w-5" />
           My Shared Vehicles
         </CardTitle>
