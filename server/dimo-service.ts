@@ -26,10 +26,9 @@ export class DimoService {
   // Get Vehicle JWT for specific vehicle access (using new preferred method)
   async getVehicleJwt(developerJwt: any, tokenId: number) {
     try {
-      return await this.dimo.tokenexchange.getVehicleJwt({
-        headers: {
-          Authorization: `Bearer ${developerJwt.access_token}`,
-        },
+      return await this.dimo.tokenexchange.exchange({
+        ...developerJwt,
+        privileges: [1, 3, 4, 5, 6],
         tokenId: tokenId,
       });
     } catch (error) {
