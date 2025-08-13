@@ -120,9 +120,7 @@ export class DimoService {
       `;
 
       const locationData = await this.dimo.telemetry.query({
-        headers: {
-          Authorization: `Bearer ${vehicleJwt.access_token}`
-        },
+        ...vehicleJwt,
         query: query,
         variables: { tokenId: tokenId }
       });
