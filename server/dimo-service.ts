@@ -27,7 +27,9 @@ export class DimoService {
   async getVehicleJwt(developerJwt: any, tokenId: number) {
     try {
       return await this.dimo.tokenexchange.getVehicleJwt({
-        ...developerJwt,
+        headers: {
+          Authorization: `Bearer ${developerJwt.access_token}`
+        },
         tokenId: tokenId
       });
     } catch (error) {
@@ -60,6 +62,9 @@ export class DimoService {
       }`;
 
       const response = await this.dimo.identity.query({
+        headers: {
+          Authorization: `Bearer ${developerJwt.access_token}`
+        },
         query: query
       });
 
@@ -115,7 +120,9 @@ export class DimoService {
       `;
 
       const locationData = await this.dimo.telemetry.query({
-        ...vehicleJwt,
+        headers: {
+          Authorization: `Bearer ${vehicleJwt.access_token}`
+        },
         query: query,
         variables: { tokenId: tokenId }
       });
