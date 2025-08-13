@@ -62,9 +62,6 @@ export class DimoService {
       }`;
 
       const response = await this.dimo.identity.query({
-        headers: {
-          Authorization: `Bearer ${developerJwt.access_token}`
-        },
         query: query
       });
 
