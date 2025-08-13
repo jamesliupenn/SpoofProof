@@ -49,11 +49,14 @@ export function useCachedDimoAuth(): CachedAuthState {
 
   // When DIMO SDK reports authenticated, cache the wallet address
   useEffect(() => {
-    if (isAuthenticated && walletAddress && email) {
+    if (isAuthenticated && walletAddress) {
+      console.log('Caching wallet address:', walletAddress, 'email:', email);
       localStorage.setItem(CACHED_WALLET_KEY, walletAddress);
-      localStorage.setItem(CACHED_EMAIL_KEY, email);
+      if (email) {
+        localStorage.setItem(CACHED_EMAIL_KEY, email);
+        setCachedEmail(email);
+      }
       setCachedWalletAddress(walletAddress);
-      setCachedEmail(email);
     }
   }, [isAuthenticated, walletAddress, email]);
 
