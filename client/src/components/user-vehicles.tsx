@@ -47,9 +47,15 @@ interface SharedVehiclesResponse {
 const fetchUserVehicles = async (
   walletAddress: string,
 ): Promise<SharedVehiclesResponse> => {
-  const response = await fetch('/api/dimo/vehicles', {
+  const cachedToken = localStorage.getItem('dimo_cached_token');
+  
+  if (!cachedToken) {
+    throw new Error('No cached DIMO token found. Please authenticate first.');
+  }
+
+  const response = await fetch(`/api/dimo/vehicles?walletAddress=${encodeURIComponent(walletAddress)}`, {
     headers: {
-      'Authorization': `Bearer ${walletAddress}`
+      'Authorization': `Bearer ${cachedToken}`
     }
   });
 
@@ -61,12 +67,17 @@ const fetchUserVehicles = async (
 };
 
 const fetchVehicleLocation = async (tokenId: number) => {
-  // Get current wallet address from localStorage for authentication
+  // Get cached token and wallet address from localStorage
+  const cachedToken = localStorage.getItem('dimo_cached_token');
   const cachedWallet = localStorage.getItem('dimo_cached_wallet_address');
   
-  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location`, {
+  if (!cachedToken) {
+    throw new Error('No cached DIMO token found. Please authenticate first.');
+  }
+  
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/location?walletAddress=${encodeURIComponent(cachedWallet || '')}`, {
     headers: {
-      'Authorization': `Bearer ${cachedWallet || ''}`
+      'Authorization': `Bearer ${cachedToken}`
     }
   });
 
