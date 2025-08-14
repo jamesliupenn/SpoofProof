@@ -207,6 +207,30 @@ export default function UserVehicles() {
     },
   });
 
+  const historyMutation = useMutation({
+    mutationFn: fetchCurrentVehicleHistory,
+    onSuccess: (historyData) => {
+      console.log("Vehicle history data received:", historyData);
+      toast({
+        title: "Weekly History Loaded",
+        description: `Found ${historyData?.data?.length || 0} historical data points`,
+      });
+      
+      // For now, we'll just log the data - future implementation could display it on the map
+      // You could extend this to show historical routes, patterns, etc.
+    },
+    onError: (error) => {
+      toast({
+        title: "History Fetch Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vehicle history",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (!isAuthenticated || !walletAddress) {
     return (
       <Card className="w-full">
@@ -354,14 +378,22 @@ export default function UserVehicles() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        // Do nothing for now as requested
-                      }}
+                      onClick={() => historyMutation.mutate(vehicle.tokenId)}
+                      disabled={historyMutation.isPending}
                       data-testid={`lastweek-button-${vehicle.tokenId}`}
                       className="text-xs"
                     >
-                      <Calendar className="mr-1 h-3 w-3" />
-                      Last Week
+                      {historyMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="mr-1 h-3 w-3" />
+                          Last Week
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

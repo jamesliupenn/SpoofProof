@@ -168,3 +168,11 @@ Preferred communication style: Simple, everyday language.
   - Added Current/Last Week buttons under each vehicle: "Current" shows current location, "Last Week" placeholder
   - Implemented clickable map pins functionality - users can click anywhere on map to drop custom red markers
   - Enhanced vehicle cards with grid layout for action buttons (Current/Last Week) with compact styling (text-xs)
+- **Enhanced Map Pin System & Vehicle History Integration (August 14, 2025)**: Improved user interaction and data visualization
+  - Implemented single-pin map system: only one user-dropped pin exists at a time, previous pins are automatically removed
+  - Added automatic map refocusing when new pins are dropped for better user experience
+  - Created GPS signal toggle: GPS dots and accuracy circles are hidden when manual pins are active
+  - Connected "Current" button to clear user pins and restore GPS vehicle tracking seamlessly
+  - Integrated "Last Week" button with `fetchCurrentVehicleHistory` function and `getVehicleWeeklyHistory` server endpoint
+  - Added proper loading states and error handling for both current location and historical data fetching
+  - Enhanced user feedback with toast notifications showing data fetch results and historical data counts
