@@ -145,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         vehicleId,
         userToken,
       );
-
+      console.log("Weekly location data:", locationData);
       // Automatically save to GPS storage for visualization
       const savedData = await storage.saveGpsData(locationData);
 

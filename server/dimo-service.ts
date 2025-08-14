@@ -159,9 +159,9 @@ export class DimoService {
         {
           signals(
             tokenId: ${tokenId},
-            from: ${from},
-            to: ${to},
-            interval: "1h"
+            from: "${from}",
+            to: "${to}",
+            interval: "6h"
           ) {
             currentLocationLatitude (agg: LAST)
             currentLocationLongitude (agg: LAST)
@@ -179,6 +179,7 @@ export class DimoService {
       console.log("DIMO Telemetry API response:", historyData);
 
       const signalsData = historyData?.data?.signals;
+
       if (!Array.isArray(signalsData) || signalsData.length === 0) {
         throw new Error("No location data available for this vehicle");
       }
@@ -201,6 +202,7 @@ export class DimoService {
         lat: avgLat,
         lng: avgLng,
         hdop: 100.0,
+        datapoints: signalsData.length,
       };
     } catch (error) {
       console.error("Error fetching DIMO vehicle location:", error);
