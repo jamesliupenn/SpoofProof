@@ -213,9 +213,9 @@ export default function UserVehicles() {
       console.log("Vehicle history data received:", historyData);
       toast({
         title: "Weekly History Loaded",
-        description: `Found ${historyData?.data?.length || 0} historical data points`,
+        description: `Found ${historyData?.datapoints} historical data points`,
       });
-      
+
       // For now, we'll just log the data - future implementation could display it on the map
       // You could extend this to show historical routes, patterns, etc.
     },
