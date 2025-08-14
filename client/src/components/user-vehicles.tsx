@@ -161,6 +161,11 @@ export default function UserVehicles() {
               },
             }),
           );
+          
+          // Also dispatch event to clear user pins and restore GPS signals
+          window.dispatchEvent(
+            new CustomEvent("clearUserPin")
+          );
         }
       } else {
         toast({
