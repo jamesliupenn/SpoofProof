@@ -145,3 +145,8 @@
 .status-no-gps {
   @apply bg-red-500;
 }
+
+/* Custom red marker styling for user-dropped pins */
+.red-marker {
+  filter: hue-rotate(0deg) saturate(2) brightness(0.8);
+}

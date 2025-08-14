@@ -305,23 +305,41 @@ export default function UserVehicles() {
                   </Badge>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => locationMutation.mutate(vehicle.tokenId)}
-                    disabled={locationMutation.isPending}
-                    data-testid={`fetch-location-${vehicle.tokenId}`}
-                  >
-                    {locationMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <MapPin className="h-4 w-4 mr-2" />
-                    )}
-                    {locationMutation.isPending
-                      ? "Fetching..."
-                      : "Get Location"}
-                  </Button>
+                <div className="mt-3 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => locationMutation.mutate(vehicle.tokenId)}
+                      disabled={locationMutation.isPending}
+                      data-testid={`current-button-${vehicle.tokenId}`}
+                      className="text-xs"
+                    >
+                      {locationMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="mr-1 h-3 w-3" />
+                          Current
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        // Do nothing for now as requested
+                      }}
+                      data-testid={`lastweek-button-${vehicle.tokenId}`}
+                      className="text-xs"
+                    >
+                      <Calendar className="mr-1 h-3 w-3" />
+                      Last Week
+                    </Button>
+                  </div>
                 </div>
 
                 {vehicle.sacds?.nodes && vehicle.sacds.nodes.length > 0 && (
