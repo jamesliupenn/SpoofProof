@@ -157,10 +157,10 @@ export class DimoService {
         {
           signals(
             tokenId: ${tokenId},
-            from: "${new Date(
+            from: ${new Date(
               Date.now() - 7 * 24 * 60 * 60 * 1000,
-            ).toISOString()}",
-            to: "${new Date().toISOString()},
+            ).toISOString()},
+            to: ${new Date().toISOString()},
             interval: "1h"
           ) {
             currentLocationLatitude (agg: LAST)
