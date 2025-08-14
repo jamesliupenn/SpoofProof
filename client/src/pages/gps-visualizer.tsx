@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Info } from "lucide-react";
-import dimoLogo from "@assets/Logo_DIMOBuild_black_1754591736408.png";
+import driveTunesLogo from "@assets/DriveTunes_Logo.png";
 import GpsMap from "@/components/gps-map";
 import DimoAuth from "@/components/dimo-auth";
 import UserVehicles from "@/components/user-vehicles";
@@ -68,11 +68,11 @@ export default function GpsVisualizer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2 lg:space-x-3">
-              <div className="h-8 lg:h-10 flex items-center" data-testid="logo">
+              <div className="h-8 sm:h-10 lg:h-12 flex items-center" data-testid="logo">
                 <img
-                  src={dimoLogo}
-                  alt="DIMO Logo"
-                  className="h-8 lg:h-10 w-auto object-contain"
+                  src={driveTunesLogo}
+                  alt="DriveTunes Logo"
+                  className="h-8 sm:h-10 lg:h-12 w-auto object-contain max-w-none"
                 />
               </div>
               <div>
@@ -80,16 +80,14 @@ export default function GpsVisualizer() {
                   className="text-lg lg:text-xl font-semibold text-slate-900"
                   data-testid="title"
                 >
-                  <span className="hidden sm:inline">
-                    DIMO Vehicle Tracking
-                  </span>
-                  <span className="sm:hidden">DIMO Vehicles</span>
+                  <span className="hidden sm:inline">DriveTunes</span>
+                  <span className="sm:hidden">DriveTunes</span>
                 </h1>
                 <p
                   className="text-xs lg:text-sm text-slate-500 hidden sm:block"
                   data-testid="subtitle"
                 >
-                  Real-time vehicle location tracking
+                  Spotify playlists based on your drive
                 </p>
               </div>
             </div>
