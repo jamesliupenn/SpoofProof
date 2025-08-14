@@ -101,6 +101,27 @@ const fetchCurrentVehicleLocation = async (tokenId: number) => {
   return response.json();
 };
 
+const fetchCurrentVehicleHistory = async (tokenId: number) => {
+  // Get cached token from localStorage
+  const cachedToken = getCookieValue("dimo_auth_token");
+
+  if (!cachedToken) {
+    throw new Error("No cached DIMO token found. Please authenticate first.");
+  }
+
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/history`, {
+    headers: {
+      Authorization: `Bearer ${cachedToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export default function UserVehicles() {
   const { isAuthenticated, walletAddress, email, isFromCache } =
     useCachedDimoAuth();
@@ -161,11 +182,9 @@ export default function UserVehicles() {
               },
             }),
           );
-          
+
           // Also dispatch event to clear user pins and restore GPS signals
-          window.dispatchEvent(
-            new CustomEvent("clearUserPin")
-          );
+          window.dispatchEvent(new CustomEvent("clearUserPin"));
         }
       } else {
         toast({
@@ -183,6 +202,30 @@ export default function UserVehicles() {
           error instanceof Error
             ? error.message
             : "Failed to fetch vehicle location",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const historyMutation = useMutation({
+    mutationFn: fetchCurrentVehicleHistory,
+    onSuccess: (historyData) => {
+      console.log("Vehicle history data received:", historyData);
+      toast({
+        title: "Weekly History Loaded",
+        description: `Found ${historyData?.data?.length || 0} historical data points`,
+      });
+      
+      // For now, we'll just log the data - future implementation could display it on the map
+      // You could extend this to show historical routes, patterns, etc.
+    },
+    onError: (error) => {
+      toast({
+        title: "History Fetch Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vehicle history",
         variant: "destructive",
       });
     },
@@ -335,14 +378,22 @@ export default function UserVehicles() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        // Do nothing for now as requested
-                      }}
+                      onClick={() => historyMutation.mutate(vehicle.tokenId)}
+                      disabled={historyMutation.isPending}
                       data-testid={`lastweek-button-${vehicle.tokenId}`}
                       className="text-xs"
                     >
-                      <Calendar className="mr-1 h-3 w-3" />
-                      Last Week
+                      {historyMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="mr-1 h-3 w-3" />
+                          Last Week
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

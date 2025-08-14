@@ -144,6 +144,68 @@ export class DimoService {
     }
   }
 
+  async getVehicleWeeklyHistory(vehicleId: string, userToken: string) {
+    try {
+      const tokenId = parseInt(vehicleId);
+
+      // Get Developer JWT and Vehicle JWT
+      const developerJwt = await this.getDeveloperJwt();
+      const vehicleJwt = await this.getVehicleJwt(developerJwt, tokenId);
+
+      // Query telemetry API for latest location data
+      const query = `
+        {
+          signals(
+            tokenId: ${tokenId},
+            from: "${new Date(
+              Date.now() - 7 * 24 * 60 * 60 * 1000,
+            ).toISOString()}",
+            to: "${new Date().toISOString()},
+            interval: "1h"
+          ) {
+            currentLocationLatitude (agg: LAST)
+            currentLocationLongitude (agg: LAST)
+          }
+        }
+      `;
+
+      const historyData = await this.dimo.telemetry.query({
+        ...vehicleJwt,
+        query: query,
+      });
+
+      console.log("DIMO Telemetry API response:", historyData);
+
+      const signalsData = historyData?.data?.signals;
+      if (!Array.isArray(signalsData) || signalsData.length === 0) {
+        throw new Error("No location data available for this vehicle");
+      }
+
+      // Average lat/lng
+      const { totalLat, totalLng } = signalsData.reduce(
+        (acc, point) => {
+          acc.totalLat += point.currentLocationLatitude;
+          acc.totalLng += point.currentLocationLongitude;
+          return acc;
+        },
+        { totalLat: 0, totalLng: 0 },
+      );
+
+      const avgLat = totalLat / signalsData.length;
+      const avgLng = totalLng / signalsData.length;
+
+      // Convert to GPS format for your app
+      return {
+        lat: avgLat,
+        lng: avgLng,
+        hdop: 100.0,
+      };
+    } catch (error) {
+      console.error("Error fetching DIMO vehicle location:", error);
+      throw error;
+    }
+  }
+
   async getVehicleTelemetry(vehicleId: string, signals: string[] = []) {
     try {
       // Get telemetry data for specified signals

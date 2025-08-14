@@ -15,7 +15,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(savedData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid GPS data", errors: error.errors });
+        res
+          .status(400)
+          .json({ message: "Invalid GPS data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to save GPS data" });
       }
@@ -44,36 +46,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-
   // DIMO API routes - require user authentication token
   app.get("/api/dimo/vehicles", async (req, res) => {
     try {
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ message: "Missing or invalid authorization token" });
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res
+          .status(401)
+          .json({ message: "Missing or invalid authorization token" });
         return;
       }
 
       const userToken = authHeader.substring(7); // Remove 'Bearer ' prefix
       const userWalletAddress = req.query.walletAddress as string;
-      
+
       if (!userWalletAddress) {
         res.status(400).json({ message: "Missing walletAddress parameter" });
         return;
       }
-      
-      const clientId = process.env.DIMO_CLIENT_ID || '0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7';
-      
-      const vehicles = await dimoService.getUserVehicles(userWalletAddress, clientId);
-      
+
+      const clientId =
+        process.env.DIMO_CLIENT_ID ||
+        "0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7";
+
+      const vehicles = await dimoService.getUserVehicles(
+        userWalletAddress,
+        clientId,
+      );
+
       res.json({
         walletAddress: userWalletAddress,
         vehicles: vehicles.nodes || [],
-        count: vehicles.nodes?.length || 0
+        count: vehicles.nodes?.length || 0,
       });
     } catch (error) {
-      console.error('Error fetching DIMO vehicles:', error);
+      console.error("Error fetching DIMO vehicles:", error);
       res.status(500).json({ message: "Failed to fetch vehicles from DIMO" });
     }
   });
@@ -83,27 +90,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { vehicleId } = req.params;
       const authHeader = req.headers.authorization;
-      
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ message: "Missing or invalid authorization token" });
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res
+          .status(401)
+          .json({ message: "Missing or invalid authorization token" });
         return;
       }
 
       const userToken = authHeader.substring(7);
-      
-      console.log('Fetching real-time location for vehicle:', vehicleId);
-      
+
+      console.log("Fetching real-time location for vehicle:", vehicleId);
+
       // Use the real DIMO service to get vehicle location
-      const locationData = await dimoService.getVehicleLocation(vehicleId, userToken);
-      
+      const locationData = await dimoService.getVehicleLocation(
+        vehicleId,
+        userToken,
+      );
+
       // Automatically save to GPS storage for visualization
       const savedData = await storage.saveGpsData(locationData);
-      
+
       res.json(savedData);
     } catch (error) {
-      console.error('Error fetching vehicle location:', error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Failed to fetch vehicle location from DIMO"
+      console.error("Error fetching vehicle location:", error);
+      res.status(500).json({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vehicle location from DIMO",
+      });
+    }
+  });
+
+  // Get real-time location data for a specific vehicle using DIMO data-sdk
+  app.get("/api/dimo/vehicles/:vehicleId/history", async (req, res) => {
+    try {
+      const { vehicleId } = req.params;
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res
+          .status(401)
+          .json({ message: "Missing or invalid authorization token" });
+        return;
+      }
+
+      const userToken = authHeader.substring(7);
+
+      console.log("Fetching weekly location for vehicle:", vehicleId);
+
+      // Use the real DIMO service to get vehicle location
+      const locationData = await dimoService.getVehicleWeeklyHistory(
+        vehicleId,
+        userToken,
+      );
+
+      // Automatically save to GPS storage for visualization
+      const savedData = await storage.saveGpsData(locationData);
+
+      res.json(savedData);
+    } catch (error) {
+      console.error("Error fetching vehicle location:", error);
+      res.status(500).json({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vehicle location from DIMO",
       });
     }
   });
@@ -112,18 +165,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { vehicleId } = req.params;
       const authHeader = req.headers.authorization;
-      
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ message: "Missing or invalid authorization token" });
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res
+          .status(401)
+          .json({ message: "Missing or invalid authorization token" });
         return;
       }
 
       const userToken = authHeader.substring(7);
-      const vehicleData = await dimoService.getVehicleData(vehicleId, userToken);
+      const vehicleData = await dimoService.getVehicleData(
+        vehicleId,
+        userToken,
+      );
       res.json(vehicleData);
     } catch (error) {
-      console.error('Error fetching DIMO vehicle data:', error);
-      res.status(500).json({ message: "Failed to fetch vehicle data from DIMO" });
+      console.error("Error fetching DIMO vehicle data:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to fetch vehicle data from DIMO" });
     }
   });
 
@@ -132,50 +192,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { vehicleId } = req.params;
       const { signals } = req.query;
       const authHeader = req.headers.authorization;
-      
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({ message: "Missing or invalid authorization token" });
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res
+          .status(401)
+          .json({ message: "Missing or invalid authorization token" });
         return;
       }
 
-      const requestedSignals = signals ? (signals as string).split(',') : [];
-      const telemetryData = await dimoService.getVehicleTelemetry(vehicleId, requestedSignals);
+      const requestedSignals = signals ? (signals as string).split(",") : [];
+      const telemetryData = await dimoService.getVehicleTelemetry(
+        vehicleId,
+        requestedSignals,
+      );
       res.json(telemetryData);
     } catch (error) {
-      console.error('Error fetching DIMO vehicle telemetry:', error);
-      res.status(500).json({ message: "Failed to fetch vehicle telemetry from DIMO" });
+      console.error("Error fetching DIMO vehicle telemetry:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to fetch vehicle telemetry from DIMO" });
     }
   });
 
   // Legacy route - redirects to new endpoint
   app.get("/api/dimo/shared-vehicles", async (req, res) => {
-    res.status(410).json({ 
-      message: "This endpoint has been deprecated. Please use /api/dimo/vehicles with proper authentication." 
+    res.status(410).json({
+      message:
+        "This endpoint has been deprecated. Please use /api/dimo/vehicles with proper authentication.",
     });
   });
 
   // Spotify API test endpoint
   app.get("/api/spotify/test", async (req, res) => {
     try {
-      console.log('Testing Spotify API via endpoint...');
+      console.log("Testing Spotify API via endpoint...");
       const results = await spotifyService.testSpotifyConnection();
-      
+
       res.json({
         success: true,
         message: "Spotify API test successful!",
-        data: results
+        data: results,
       });
     } catch (error) {
-      console.error('Spotify API test failed:', error);
+      console.error("Spotify API test failed:", error);
       res.status(500).json({
         success: false,
         message: "Spotify API test failed",
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
-
-
 
   const httpServer = createServer(app);
   return httpServer;
