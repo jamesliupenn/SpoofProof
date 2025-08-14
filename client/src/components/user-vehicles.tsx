@@ -101,6 +101,27 @@ const fetchCurrentVehicleLocation = async (tokenId: number) => {
   return response.json();
 };
 
+const fetchCurrentVehicleHistory = async (tokenId: number) => {
+  // Get cached token from localStorage
+  const cachedToken = getCookieValue("dimo_auth_token");
+
+  if (!cachedToken) {
+    throw new Error("No cached DIMO token found. Please authenticate first.");
+  }
+
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/history`, {
+    headers: {
+      Authorization: `Bearer ${cachedToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export default function UserVehicles() {
   const { isAuthenticated, walletAddress, email, isFromCache } =
     useCachedDimoAuth();
@@ -161,11 +182,9 @@ export default function UserVehicles() {
               },
             }),
           );
-          
+
           // Also dispatch event to clear user pins and restore GPS signals
-          window.dispatchEvent(
-            new CustomEvent("clearUserPin")
-          );
+          window.dispatchEvent(new CustomEvent("clearUserPin"));
         }
       } else {
         toast({
