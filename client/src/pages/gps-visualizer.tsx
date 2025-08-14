@@ -80,16 +80,14 @@ export default function GpsVisualizer() {
                   className="text-lg lg:text-xl font-semibold text-slate-900"
                   data-testid="title"
                 >
-                  <span className="hidden sm:inline">
-                    DIMO Vehicle Tracking
-                  </span>
-                  <span className="sm:hidden">DIMO Vehicles</span>
+                  <span className="hidden sm:inline">DriveTunes</span>
+                  <span className="sm:hidden">DriveTunes</span>
                 </h1>
                 <p
                   className="text-xs lg:text-sm text-slate-500 hidden sm:block"
                   data-testid="subtitle"
                 >
-                  Real-time vehicle location tracking
+                  A Spotify playlist generator based on your drive
                 </p>
               </div>
             </div>
@@ -117,14 +115,18 @@ export default function GpsVisualizer() {
                   data-testid="map-title"
                 >
                   <Info className="text-blue-600 mr-2" size={16} />
-                  Vehicle Location Map
+                  Vehicle Map
                 </h3>
               </div>
 
               <div className="w-full h-[calc(100%-3rem)]">
                 <GpsMap
                   gpsData={gpsData}
-                  gpsStatus={{ status: "good-gps", message: "Ready", showOnMap: true }}
+                  gpsStatus={{
+                    status: "good-gps",
+                    message: "Ready",
+                    showOnMap: true,
+                  }}
                   lastKnownLocation={lastKnownLocation}
                   focusLocation={focusLocation}
                 />

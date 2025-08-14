@@ -80,7 +80,7 @@ const fetchUserVehicles = async (
   return response.json();
 };
 
-const fetchVehicleLocation = async (tokenId: number) => {
+const fetchCurrentVehicleLocation = async (tokenId: number) => {
   // Get cached token from localStorage
   const cachedToken = getCookieValue("dimo_auth_token");
 
@@ -140,7 +140,7 @@ export default function UserVehicles() {
   });
 
   const locationMutation = useMutation({
-    mutationFn: fetchVehicleLocation,
+    mutationFn: fetchCurrentVehicleLocation,
     onSuccess: (locationData) => {
       if (locationData.lat && locationData.lng) {
         toast({
