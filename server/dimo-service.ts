@@ -177,17 +177,27 @@ export class DimoService {
       console.log("DIMO Telemetry API response:", historyData);
 
       const signalsData = historyData?.data?.signals;
-      const latitude = signalsData?.currentLocationLatitude;
-      const longitude = signalsData?.currentLocationLongitude;
-
-      if (!latitude || !longitude) {
+      if (!Array.isArray(signalsData) || signalsData.length === 0) {
         throw new Error("No location data available for this vehicle");
       }
 
+      // Average lat/lng
+      const { totalLat, totalLng } = signalsData.reduce(
+        (acc, point) => {
+          acc.totalLat += point.currentLocationLatitude;
+          acc.totalLng += point.currentLocationLongitude;
+          return acc;
+        },
+        { totalLat: 0, totalLng: 0 },
+      );
+
+      const avgLat = totalLat / signalsData.length;
+      const avgLng = totalLng / signalsData.length;
+
       // Convert to GPS format for your app
       return {
-        lat: parseFloat(latitude),
-        lng: parseFloat(longitude),
+        lat: avgLat,
+        lng: avgLng,
         hdop: 100.0,
       };
     } catch (error) {
