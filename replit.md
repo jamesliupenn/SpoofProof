@@ -160,3 +160,11 @@ Preferred communication style: Simple, everyday language.
   - Successfully tested Spotify API with full artist search results including popularity, images, and metadata
   - Removed GPS Status, GPS Controls, and Test Scenarios components for cleaner interface
   - Streamlined application to focus on vehicle location tracking and vehicle management
+- **DriveTunes Rebranding & Layout Optimization (August 14, 2025)**: Complete rebrand with improved responsive design
+  - Replaced DIMO branding with DriveTunes logo (DriveTunes_Logo.png) and removed old DIMO assets
+  - Increased logo size by 20% with responsive scaling (h-10/h-12/h-16) and expanded header height to h-20
+  - Removed subtitle and updated app title to "DriveTunes" with "Spotify playlists based on your drive" concept
+  - Restructured desktop layout: 50% vehicle panel (left), 50% map (right) using lg:grid-cols-2 instead of lg:grid-cols-4
+  - Added Current/Last Week buttons under each vehicle: "Current" shows current location, "Last Week" placeholder
+  - Implemented clickable map pins functionality - users can click anywhere on map to drop custom red markers
+  - Enhanced vehicle cards with grid layout for action buttons (Current/Last Week) with compact styling (text-xs)

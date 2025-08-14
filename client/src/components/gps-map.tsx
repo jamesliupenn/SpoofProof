@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 
 // Fix for default marker icons in React-Leaflet
@@ -41,6 +41,7 @@ export default function GpsMap({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
+  const [userPins, setUserPins] = useState<L.Marker[]>([]);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -54,6 +55,29 @@ export default function GpsMap({
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors",
     }).addTo(mapInstanceRef.current);
+
+    // Add click event to drop pins
+    mapInstanceRef.current.on("click", (e: L.LeafletMouseEvent) => {
+      const { lat, lng } = e.latlng;
+      
+      // Create a custom red pin icon for user clicks
+      const redIcon = L.icon({
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        className: 'red-marker'
+      });
+      
+      const newPin = L.marker([lat, lng], { icon: redIcon })
+        .addTo(mapInstanceRef.current!)
+        .bindPopup(`📍 Pin dropped at:<br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`)
+        .openPopup();
+      
+      setUserPins(prev => [...prev, newPin]);
+    });
   }, []);
 
   useEffect(() => {

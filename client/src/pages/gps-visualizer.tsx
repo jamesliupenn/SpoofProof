@@ -66,29 +66,26 @@ export default function GpsVisualizer() {
         data-testid="header"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-2 lg:space-x-3">
-              <div className="h-8 sm:h-10 lg:h-12 flex items-center" data-testid="logo">
+              <div
+                className="h-10 sm:h-12 lg:h-16 flex items-center"
+                data-testid="logo"
+              >
                 <img
                   src={driveTunesLogo}
                   alt="DriveTunes Logo"
-                  className="h-8 sm:h-10 lg:h-12 w-auto object-contain max-w-none"
+                  className="h-10 sm:h-12 lg:h-16 w-auto object-contain max-w-none"
                 />
               </div>
               <div>
                 <h1
-                  className="text-lg lg:text-xl font-semibold text-slate-900"
+                  className="text-xl lg:text-2xl font-semibold text-slate-900"
                   data-testid="title"
                 >
                   <span className="hidden sm:inline">DriveTunes</span>
                   <span className="sm:hidden">DriveTunes</span>
                 </h1>
-                <p
-                  className="text-xs lg:text-sm text-slate-500 hidden sm:block"
-                  data-testid="subtitle"
-                >
-                  Spotify playlists based on your drive
-                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2 lg:space-x-4">
@@ -100,14 +97,14 @@ export default function GpsVisualizer() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6 min-h-[calc(100vh-8rem)]">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-9rem)]">
           {/* Control Panel */}
           <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
             <UserVehicles />
           </div>
 
           {/* Map Container */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
+          <div className="lg:col-span-1 order-1 lg:order-2">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[50vh] lg:h-full overflow-hidden">
               <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 lg:px-6">
                 <h3

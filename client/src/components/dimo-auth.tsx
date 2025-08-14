@@ -109,7 +109,7 @@ export default function DimoAuth() {
   return (
     <ShareVehiclesWithDimo
       mode="redirect"
-      permissionTemplateIds={2}
+      permissionTemplateId={2}
       expirationDate={expirationDate}
       unAuthenticatedLabel="Show My Vehicles"
       authenticatedLabel="Manage My Vehicles"
@@ -119,12 +119,12 @@ export default function DimoAuth() {
       <Button
         variant="default"
         size="sm"
-        className="flex items-center space-x-1 text-xs px-2 py-1"
+        className="flex items-center space-x-2"
         data-testid="button-share-vehicles"
       >
-        <Car size={12} />
-        <span className="hidden sm:inline text-xs">Login with DIMO</span>
-        <span className="sm:hidden text-xs">Login</span>
+        <Car size={14} />
+        <span className="hidden sm:inline">Share Vehicles</span>
+        <span className="sm:hidden">Share</span>
       </Button>
     </ShareVehiclesWithDimo>
   );
