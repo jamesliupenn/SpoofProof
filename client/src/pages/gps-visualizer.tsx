@@ -68,11 +68,11 @@ export default function GpsVisualizer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2 lg:space-x-3">
-              <div className="h-6 lg:h-8 flex items-center" data-testid="logo">
+              <div className="h-8 lg:h-10 flex items-center" data-testid="logo">
                 <img
                   src={dimoLogo}
                   alt="DIMO Logo"
-                  className="h-6 lg:h-8 w-auto object-contain"
+                  className="h-8 lg:h-10 w-auto object-contain"
                 />
               </div>
               <div>
@@ -117,14 +117,18 @@ export default function GpsVisualizer() {
                   data-testid="map-title"
                 >
                   <Info className="text-blue-600 mr-2" size={16} />
-                  Vehicle Location Map
+                  Vehicle Map
                 </h3>
               </div>
 
               <div className="w-full h-[calc(100%-3rem)]">
                 <GpsMap
                   gpsData={gpsData}
-                  gpsStatus={{ status: "good-gps", message: "Ready", showOnMap: true }}
+                  gpsStatus={{
+                    status: "good-gps",
+                    message: "Ready",
+                    showOnMap: true,
+                  }}
                   lastKnownLocation={lastKnownLocation}
                   focusLocation={focusLocation}
                 />

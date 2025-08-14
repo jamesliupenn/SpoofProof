@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertGpsDataSchema } from "@shared/schema";
 import { z } from "zod";
 import { dimoService } from "./dimo-service";
+import { spotifyService } from "./spotify-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GPS data routes
@@ -151,6 +152,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(410).json({ 
       message: "This endpoint has been deprecated. Please use /api/dimo/vehicles with proper authentication." 
     });
+  });
+
+  // Spotify API test endpoint
+  app.get("/api/spotify/test", async (req, res) => {
+    try {
+      console.log('Testing Spotify API via endpoint...');
+      const results = await spotifyService.testSpotifyConnection();
+      
+      res.json({
+        success: true,
+        message: "Spotify API test successful!",
+        data: results
+      });
+    } catch (error) {
+      console.error('Spotify API test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: "Spotify API test failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
   });
 
 
