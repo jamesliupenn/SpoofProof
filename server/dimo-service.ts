@@ -151,16 +151,16 @@ export class DimoService {
       // Get Developer JWT and Vehicle JWT
       const developerJwt = await this.getDeveloperJwt();
       const vehicleJwt = await this.getVehicleJwt(developerJwt, tokenId);
+      const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const to = new Date().toISOString();
 
       // Query telemetry API for latest location data
       const query = `
         {
           signals(
             tokenId: ${tokenId},
-            from: ${new Date(
-              Date.now() - 7 * 24 * 60 * 60 * 1000,
-            ).toISOString()},
-            to: ${new Date().toISOString()},
+            from: ${from},
+            to: ${to},
             interval: "1h"
           ) {
             currentLocationLatitude (agg: LAST)
@@ -168,6 +168,8 @@ export class DimoService {
           }
         }
       `;
+
+      console.log(query);
 
       const historyData = await this.dimo.telemetry.query({
         ...vehicleJwt,
