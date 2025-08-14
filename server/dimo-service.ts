@@ -151,23 +151,25 @@ export class DimoService {
       // Get Developer JWT and Vehicle JWT
       const developerJwt = await this.getDeveloperJwt();
       const vehicleJwt = await this.getVehicleJwt(developerJwt, tokenId);
+      const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const to = new Date().toISOString();
 
       // Query telemetry API for latest location data
       const query = `
         {
           signals(
             tokenId: ${tokenId},
-            from: "${new Date(
-              Date.now() - 7 * 24 * 60 * 60 * 1000,
-            ).toISOString()}",
-            to: "${new Date().toISOString()},
-            interval: "1h"
+            from: "${from}",
+            to: "${to}",
+            interval: "6h"
           ) {
             currentLocationLatitude (agg: LAST)
             currentLocationLongitude (agg: LAST)
           }
         }
       `;
+
+      console.log(query);
 
       const historyData = await this.dimo.telemetry.query({
         ...vehicleJwt,
@@ -177,6 +179,7 @@ export class DimoService {
       console.log("DIMO Telemetry API response:", historyData);
 
       const signalsData = historyData?.data?.signals;
+
       if (!Array.isArray(signalsData) || signalsData.length === 0) {
         throw new Error("No location data available for this vehicle");
       }
@@ -199,6 +202,7 @@ export class DimoService {
         lat: avgLat,
         lng: avgLng,
         hdop: 100.0,
+        datapoints: signalsData.length,
       };
     } catch (error) {
       console.error("Error fetching DIMO vehicle location:", error);

@@ -213,11 +213,27 @@ export default function UserVehicles() {
       console.log("Vehicle history data received:", historyData);
       toast({
         title: "Weekly History Loaded",
-        description: `Found ${historyData?.data?.length || 0} historical data points`,
+        description: `Found ${historyData?.datapoints} historical data points`,
       });
-      
-      // For now, we'll just log the data - future implementation could display it on the map
-      // You could extend this to show historical routes, patterns, etc.
+
+      // Invalidate GPS data to trigger a refresh of the map
+      queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
+
+      // Notify parent component to focus on the new location and update GPS data
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("focusMapLocation", {
+            detail: {
+              lat: historyData.lat,
+              lng: historyData.lng,
+              hdop: historyData.hdop || 1.0,
+            },
+          }),
+        );
+
+        // Also dispatch event to clear user pins and restore GPS signals
+        window.dispatchEvent(new CustomEvent("clearUserPin"));
+      }
     },
     onError: (error) => {
       toast({
