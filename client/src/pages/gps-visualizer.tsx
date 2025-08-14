@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Info } from "lucide-react";
-import dimoLogo from "@assets/Logo_DIMOBuild_black_1754591736408.png";
+import driveTunesLogo from "@assets/DriveTunes_Logo.png";
 import GpsMap from "@/components/gps-map";
 import DimoAuth from "@/components/dimo-auth";
 import UserVehicles from "@/components/user-vehicles";
@@ -70,9 +70,9 @@ export default function GpsVisualizer() {
             <div className="flex items-center space-x-2 lg:space-x-3">
               <div className="h-6 lg:h-8 flex items-center" data-testid="logo">
                 <img
-                  src={dimoLogo}
-                  alt="DIMO Logo"
-                  className="h-6 lg:h-8 w-auto object-contain"
+                  src={driveTunesLogo}
+                  alt="DriveTunes Logo"
+                  className="h-20 lg:h-2 w-auto object-contain"
                 />
               </div>
               <div>
