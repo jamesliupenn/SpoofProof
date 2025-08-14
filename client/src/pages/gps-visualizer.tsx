@@ -4,6 +4,7 @@ import driveTunesLogo from "@assets/DriveTunes_Logo.png";
 import GpsMap from "@/components/gps-map";
 import DimoAuth from "@/components/dimo-auth";
 import UserVehicles from "@/components/user-vehicles";
+import SpotifyPlaylistGenerator from "@/components/spotify-playlist-generator";
 
 interface GpsData {
   lat: number;
@@ -101,6 +102,7 @@ export default function GpsVisualizer() {
           {/* Control Panel */}
           <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
             <UserVehicles />
+            <SpotifyPlaylistGenerator />
           </div>
 
           {/* Map Container */}

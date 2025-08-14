@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertGpsDataSchema } from "@shared/schema";
 import { z } from "zod";
 import { dimoService } from "./dimo-service";
-import { spotifyService } from "./spotify-service";
+import { testSpotifyConnection, getSpotifyConfig, exchangeCodeForTokens, createUserSpotifyClient, getUserProfile } from "./spotify-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GPS data routes
@@ -222,11 +222,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Spotify API test endpoint
+  // Spotify PKCE endpoints
+  app.get("/api/spotify/config", async (req, res) => {
+    try {
+      const config = getSpotifyConfig();
+      res.json(config);
+    } catch (error) {
+      console.error("Error getting Spotify config:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get Spotify configuration",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.post("/api/spotify/auth/login", async (req, res) => {
+    try {
+      const { code_verifier } = req.body;
+      
+      if (!code_verifier) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Missing code verifier" 
+        });
+        return;
+      }
+
+      // Store code verifier temporarily (in a real app, use Redis or database)
+      // For now, we'll handle this client-side with localStorage
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Spotify login error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to prepare Spotify login" 
+      });
+    }
+  });
+
+  app.get("/api/spotify/callback", async (req, res) => {
+    try {
+      const { code, state } = req.query;
+      
+      if (!code) {
+        res.redirect(`/?spotify_error=${encodeURIComponent('Missing authorization code')}`);
+        return;
+      }
+
+      // For this implementation, we'll pass the code to frontend and handle token exchange there
+      res.redirect(`/?spotify_code=${encodeURIComponent(code as string)}`);
+    } catch (error) {
+      console.error("Spotify callback error:", error);
+      res.redirect(`/?spotify_error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`);
+    }
+  });
+
+  app.post("/api/spotify/exchange", async (req, res) => {
+    try {
+      const { code, code_verifier } = req.body;
+      
+      if (!code || !code_verifier) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Missing authorization code or code verifier" 
+        });
+        return;
+      }
+
+      // Exchange code for tokens
+      const tokens = await exchangeCodeForTokens(code, code_verifier);
+      
+      // Create user session (using a simple user ID for now)
+      const userId = 'user_' + Date.now();
+      createUserSpotifyClient(userId, tokens.accessToken, tokens.refreshToken);
+      
+      res.json({ 
+        success: true, 
+        userId,
+        tokens: {
+          access_token: tokens.accessToken,
+          expires_in: tokens.expiresIn
+        }
+      });
+    } catch (error) {
+      console.error("Token exchange error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Token exchange failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get("/api/spotify/profile", async (req, res) => {
+    try {
+      const userId = req.query.userId as string;
+      
+      if (!userId) {
+        res.status(401).json({ 
+          success: false, 
+          message: "Missing userId parameter" 
+        });
+        return;
+      }
+
+      const profile = await getUserProfile(userId);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error getting Spotify profile:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get Spotify profile",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  // Legacy Spotify test endpoint
   app.get("/api/spotify/test", async (req, res) => {
     try {
       console.log("Testing Spotify API via endpoint...");
-      const results = await spotifyService.testSpotifyConnection();
+      const results = await testSpotifyConnection();
 
       res.json({
         success: true,
