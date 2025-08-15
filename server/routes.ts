@@ -64,9 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const clientId =
-        process.env.DIMO_CLIENT_ID ||
-        "0xE40AEc6f45e854b2E0cDa20624732F16AA029Ae7";
+      const clientId = process.env.DIMO_CLIENT_ID || "";
 
       const vehicles = await dimoService.getUserVehicles(
         userWalletAddress,
@@ -220,7 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "This endpoint has been deprecated. Please use /api/dimo/vehicles with proper authentication.",
     });
   });
-
 
   const httpServer = createServer(app);
   return httpServer;
