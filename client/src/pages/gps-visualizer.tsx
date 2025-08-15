@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Info } from "lucide-react";
-import driveTunesLogo from "@assets/DriveTunes_Logo.png";
+import logoBlack from "@/assets/logo-black.png";
+import logoWhite from "@/assets/logo-white.png";
 import GpsMap from "@/components/gps-map";
 import DimoAuth from "@/components/dimo-auth";
 import UserVehicles from "@/components/user-vehicles";
-import SpotifyPlaylistGenerator from "@/components/spotify-playlist-generator";
+import ThemeToggle from "@/components/theme-toggle";
+import { useTheme } from "@/components/theme-provider";
 
 interface GpsData {
   lat: number;
@@ -13,6 +15,7 @@ interface GpsData {
 }
 
 export default function GpsVisualizer() {
+  const { theme } = useTheme();
   const [gpsData, setGpsData] = useState<GpsData>({
     lat: 40.7128,
     lng: -74.006,
@@ -60,10 +63,10 @@ export default function GpsVisualizer() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50" data-testid="gps-visualizer">
+    <div className="min-h-screen bg-background" data-testid="gps-visualizer">
       {/* Header */}
       <header
-        className="bg-white shadow-sm border-b border-slate-200"
+        className="bg-card shadow-sm border-b border-border"
         data-testid="header"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,22 +77,23 @@ export default function GpsVisualizer() {
                 data-testid="logo"
               >
                 <img
-                  src={driveTunesLogo}
-                  alt="DriveTunes Logo"
+                  src={theme === "dark" ? logoWhite : logoBlack}
+                  alt="DIMO Build Logo"
                   className="h-10 sm:h-12 lg:h-16 w-auto object-contain max-w-none"
                 />
               </div>
               <div>
                 <h1
-                  className="text-xl lg:text-2xl font-semibold text-slate-900"
+                  className="text-xl lg:text-2xl font-semibold text-foreground"
                   data-testid="title"
                 >
-                  <span className="hidden sm:inline">DriveTunes</span>
-                  <span className="sm:hidden">DriveTunes</span>
+                  <span className="hidden sm:inline">Developer Kit</span>
+                  <span className="sm:hidden">Dev Kit</span>
                 </h1>
               </div>
             </div>
             <div className="flex items-center space-x-2 lg:space-x-4">
+              <ThemeToggle />
               <DimoAuth />
             </div>
           </div>
@@ -102,15 +106,14 @@ export default function GpsVisualizer() {
           {/* Control Panel */}
           <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
             <UserVehicles />
-            <SpotifyPlaylistGenerator />
           </div>
 
           {/* Map Container */}
           <div className="lg:col-span-1 order-1 lg:order-2">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[50vh] lg:h-full overflow-hidden">
-              <div className="h-12 border-b border-slate-200 flex items-center justify-between px-4 lg:px-6">
+            <div className="bg-card rounded-xl shadow-sm border border-border h-[50vh] lg:h-full overflow-hidden">
+              <div className="h-12 border-b border-border flex items-center justify-between px-4 lg:px-6">
                 <h3
-                  className="font-semibold text-slate-900 flex items-center text-sm lg:text-base"
+                  className="font-semibold text-foreground flex items-center text-sm lg:text-base"
                   data-testid="map-title"
                 >
                   <Info className="text-blue-600 mr-2" size={16} />

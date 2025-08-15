@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DimoAuthProvider, initializeDimoSDK } from "@dimo-network/login-with-dimo";
+import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import GpsVisualizer from "@/pages/gps-visualizer";
 
@@ -27,10 +28,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <DimoAuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
       </DimoAuthProvider>
     </QueryClientProvider>
   );
