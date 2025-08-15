@@ -1,62 +1,39 @@
-# Deployment Guide
+# DIMO Build Developer Kit
 
-## Production Build and Deployment
+## Overview
 
-### Prerequisites
-Before deploying, ensure you have:
-1. Built the application for production
-2. Set up static file serving correctly
-3. Configured environment variables
+This is a Replit template for running an app that integrates [Login with DIMO](https://www.npmjs.com/package/@dimo-network/login-with-dimo) and [DIMO Data SDK](https://www.npmjs.com/package/@dimo-network/data-sdk).
 
-### Building for Production
+## Quick Start
 
-Run the production build script:
-```bash
-./build-production.sh
-```
+1. Remix this Replite Template
+2. Update secrets with your own DIMO Developer License credentials, if you don't have these credentials, sign up on the [DIMO Developer Console](https://console.dimo.org):
+  - Client ID: `DIMO_CLIENT_ID` & `VITE_DIMO_CLIENT_ID`
+  - Redirect URI: `DIMO_REDIRECT_URI` & `VITE_DIMO_REDIRECT_URI`
+  - API Key: `DIMO_API_KEY`
 
-This script will:
-1. Run `npm run build` to build both the client and server
-2. Create the `server/public` directory
-3. Copy static files from `dist/public` to `server/public`
+## Deployment Configuration
 
-### Starting the Production Server
+### Production Build Process
+- **Build Script**: Custom `build-production.sh` script handles complete production build
+- **Static File Serving**: Fixed file path mismatch between build output (`dist/public`) and server expectations (`server/public`)
+- **Host Binding**: Server configured to bind to `0.0.0.0:5000` for proper interface access
+- **Environment Detection**: Automatic switching between development (Vite HMR) and production (static file serving) modes
 
-#### Option 1: Using the startup script (Recommended)
-```bash
-./start-production.sh
-```
-
-#### Option 2: Manual startup
-```bash
-NODE_ENV=production node dist/index.js
-```
-
-### Key Deployment Fixes Applied
-
-1. **Static File Serving**: Fixed the mismatch between build output (`dist/public`) and expected location (`server/public`)
-2. **Host Binding**: Server is configured to bind to `0.0.0.0:5000` for proper interface access
-3. **Production Mode**: The server correctly serves static files in production using the `serveStatic` function
-4. **ES Module Compatibility**: Created DIMO SDK wrapper to handle directory import issues
-5. **Custom Build Process**: Updated esbuild configuration with proper externals and bundling
-6. **Graceful Fallback**: DIMO SDK wrapper provides proper error handling and fallback behavior for production deployment
-
-### Environment Variables
-- `PORT`: Server port (defaults to 5000)
-- `NODE_ENV`: Set to "production" for production deployment
-
-### File Structure
+### Build Output Structure
 ```
 ├── dist/
-│   ├── index.js          # Built server
-│   └── public/           # Built client files (Vite output)
+│   ├── index.js          # Bundled server (ESBuild)
+│   └── public/           # Client build output (Vite)
 ├── server/
-│   └── public/           # Static files for production serving
-├── build-production.sh   # Production build script
-└── package.json
+│   └── public/           # Production static files location
 ```
 
-### Troubleshooting
-- If static files aren't served, ensure `server/public` exists and contains the built client files
-- Verify the server is binding to `0.0.0.0` and not just `localhost`
-- Check that `NODE_ENV=production` is set when running the production server
+### Deployment Requirements
+- Node.js runtime environment
+- Environment variable `NODE_ENV=production`
+- Port configuration via `PORT` environment variable (defaults to 5000)
+- Static files must be properly copied to `server/public` before starting production server
+
+## Source
+This template is based on the using DIMO's Developer SDKs. For more information, visit https://docs.dimo.org/developer-platform/developer-guide/dimo-developer-sdks
