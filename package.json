@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@dimo-network/data-sdk": "^1.3.2",
-    "@dimo-network/login-with-dimo": "^0.0.26",
+    "@dimo-network/login-with-dimo": "^0.0.27",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
