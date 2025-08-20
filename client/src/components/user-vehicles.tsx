@@ -407,7 +407,7 @@ export default function UserVehicles() {
                       ) : (
                         <>
                           <Calendar className="mr-1 h-3 w-3" />
-                          Last Week
+                          Last Week Approximated
                         </>
                       )}
                     </Button>

@@ -201,7 +201,7 @@ export class DimoService {
       return {
         lat: avgLat,
         lng: avgLng,
-        hdop: 100.0,
+        hdop: 1000.0,
         datapoints: signalsData.length,
       };
     } catch (error) {

@@ -7,6 +7,7 @@ import DimoAuth from "@/components/dimo-auth";
 import UserVehicles from "@/components/user-vehicles";
 import ThemeToggle from "@/components/theme-toggle";
 import { useTheme } from "@/components/theme-provider";
+import GitHubButton from "react-github-btn";
 
 interface GpsData {
   lat: number;
@@ -102,6 +103,17 @@ export default function GpsVisualizer() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <GitHubButton
+          href="https://github.com/dimo-network/data-sdk"
+          data-color-scheme="no-preference: light; light: light; dark: dark;"
+          data-icon="octicon-star"
+          data-size="large"
+          data-show-count="true"
+          aria-label="Star dimo-network/data-sdk on GitHub"
+        >
+          Star
+        </GitHubButton>
+
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-9rem)]">
           {/* Control Panel */}
           <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">

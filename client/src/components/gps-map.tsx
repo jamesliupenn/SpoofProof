@@ -60,35 +60,42 @@ export default function GpsMap({
     // Add click event to drop pins
     mapInstanceRef.current.on("click", (e: L.LeafletMouseEvent) => {
       const { lat, lng } = e.latlng;
-      
+
       // Remove existing user pin if it exists
       if (userPinRef.current) {
         mapInstanceRef.current!.removeLayer(userPinRef.current);
         userPinRef.current = null;
       }
-      
+
       // Create a custom red pin icon for user clicks
       const redIcon = L.icon({
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+        shadowUrl:
+          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
         shadowSize: [41, 41],
-        className: 'red-marker'
+        className: "red-marker",
       });
-      
+
       // Create new pin and add to map
       userPinRef.current = L.marker([lat, lng], { icon: redIcon })
         .addTo(mapInstanceRef.current!)
-        .bindPopup(`📍 Pin dropped at:<br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`)
+        .bindPopup(
+          `📍 Pin dropped at:<br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`,
+        )
         .openPopup();
-      
+
       // Set flag to indicate user has dropped a pin
       setHasUserPin(true);
-      
+
       // Refocus map to the new pin location
-      mapInstanceRef.current!.setView([lat, lng], mapInstanceRef.current!.getZoom());
+      mapInstanceRef.current!.setView(
+        [lat, lng],
+        mapInstanceRef.current!.getZoom(),
+      );
     });
   }, []);
 
@@ -142,7 +149,7 @@ export default function GpsMap({
       // Only show accuracy circle if GPS is active
       if (!isOffline) {
         // Calculate accuracy radius
-        const accuracyRadius = hdop > 10 ? hdop * 5 : Math.max(hdop * 2, 3);
+        const accuracyRadius = hdop > 10 ? hdop * 10 : Math.max(hdop * 2, 3);
 
         // Add accuracy circle
         circleRef.current = L.circle([displayLat, displayLng], {
@@ -216,7 +223,7 @@ export default function GpsMap({
     if (focusLocation && mapInstanceRef.current) {
       mapInstanceRef.current.setView(
         [focusLocation.lat, focusLocation.lng],
-        16,
+        focusLocation.hdop > 10 ? 11 : 15,
       );
     }
   }, [focusLocation]);
