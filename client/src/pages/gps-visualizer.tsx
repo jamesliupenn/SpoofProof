@@ -111,7 +111,7 @@ export default function GpsVisualizer() {
           data-show-count="true"
           aria-label="Star dimo-network/data-sdk on GitHub"
         >
-          Star DIMO Data SDK
+          DIMO Data SDK
         </GitHubButton>
         <GitHubButton
           href="https://github.com/dimo-network/login-with-dimo"
@@ -121,7 +121,7 @@ export default function GpsVisualizer() {
           data-show-count="true"
           aria-label="Star dimo-network/login-with-dimo on GitHub"
         >
-          Star Login with DIMO
+          Login with DIMO
         </GitHubButton>
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-9rem)]">
           {/* Control Panel */}
