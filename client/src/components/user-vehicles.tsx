@@ -336,9 +336,9 @@ export default function UserVehicles() {
                         )}
                       </Button>
                     </div>
-                    {vehicleVins[vehicle.tokenId] && (
+                    {vehicleVins && (
                       <div className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-md font-mono">
-                        VIN: {vehicleVins[vehicle.tokenId]}
+                        VIN: {vehicleVins}
                       </div>
                     )}
                   </div>

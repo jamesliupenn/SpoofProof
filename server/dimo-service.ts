@@ -86,7 +86,7 @@ export class DimoService {
     }
   }
 
-  async getVehicleLocation(vehicleId: string) {
+  async getVehicleLocation(vehicleId: string, userToken: string) {
     try {
       const tokenId = parseInt(vehicleId);
 
@@ -120,10 +120,8 @@ export class DimoService {
         query: query,
       });
 
-      const vehicleVin = await this.dimo.telemetry.getVin({
-        ...vehicleJwt,
-        tokenId: tokenId,
-      });
+      // Get VIN data separately
+      const vehicleVin = await this.getVehicleVin(vehicleId, userToken);
 
       console.log("DIMO Telemetry API response:", locationData, vehicleVin);
 
@@ -146,6 +144,28 @@ export class DimoService {
       };
     } catch (error) {
       console.error("Error fetching DIMO vehicle location:", error);
+      throw error;
+    }
+  }
+
+  async getVehicleVin(vehicleId: string, userToken: string) {
+    try {
+      const tokenId = parseInt(vehicleId);
+
+      // Get Developer JWT and Vehicle JWT
+      const developerJwt = await this.getDeveloperJwt();
+      const vehicleJwt = await this.getVehicleJwt(developerJwt, tokenId);
+
+      const vehicleVin = await this.dimo.telemetry.getVin({
+        ...vehicleJwt,
+        tokenId: tokenId,
+      });
+
+      console.log("DIMO VIN API response:", vehicleVin);
+
+      return vehicleVin?.vin || "Unknown";
+    } catch (error) {
+      console.error("Error fetching DIMO vehicle VIN:", error);
       throw error;
     }
   }
