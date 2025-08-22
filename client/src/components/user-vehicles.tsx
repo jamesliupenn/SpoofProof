@@ -81,7 +81,6 @@ const fetchUserVehicles = async (
 };
 
 const fetchCurrentVehicleLocation = async (tokenId: number) => {
-  // Get cached token from localStorage
   const cachedToken = getCookieValue("dimo_auth_token");
 
   if (!cachedToken) {
@@ -96,6 +95,26 @@ const fetchCurrentVehicleLocation = async (tokenId: number) => {
 
   if (!response.ok) {
     throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+const fetchVehicleVin = async (tokenId: number) => {
+  const cachedToken = getCookieValue("dimo_auth_token");
+
+  if (!cachedToken) {
+    throw new Error("No cached DIMO token found. Please authenticate first.");
+  }
+
+  const response = await fetch(`/api/dimo/vehicles/${tokenId}/vin`, {
+    headers: {
+      Authorization: `Bearer ${cachedToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch vehicle VIN: ${response.statusText}`);
   }
 
   return response.json();
@@ -149,11 +168,6 @@ export default function UserVehicles() {
           description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)} (HDOP: ${locationData.hdop})`,
         });
         
-        // Store VIN data if available
-        if (locationData.vin && locationData.vin !== "Unknown") {
-          setVehicleVins(prev => ({ ...prev, [variables]: locationData.vin }));
-        }
-        
         // Invalidate GPS data to trigger a refresh of the map
         queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
 
@@ -188,6 +202,35 @@ export default function UserVehicles() {
           error instanceof Error
             ? error.message
             : "Failed to fetch vehicle location",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const vinMutation = useMutation({
+    mutationFn: fetchVehicleVin,
+    onSuccess: (vinData, variables) => {
+      if (vinData.vin && vinData.vin !== "Unknown") {
+        setVehicleVins(prev => ({ ...prev, [variables]: vinData.vin }));
+        toast({
+          title: "VIN Retrieved",
+          description: `Vehicle VIN: ${vinData.vin}`,
+        });
+      } else {
+        toast({
+          title: "No VIN Data",
+          description: "VIN data is not available for this vehicle",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "VIN Fetch Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch vehicle VIN",
         variant: "destructive",
       });
     },
@@ -318,12 +361,15 @@ export default function UserVehicles() {
                       <Button
                         size="sm"
                         variant="default"
-                        onClick={() => locationMutation.mutate(vehicle.tokenId)}
-                        disabled={locationMutation.isPending}
+                        onClick={() => {
+                          locationMutation.mutate(vehicle.tokenId);
+                          vinMutation.mutate(vehicle.tokenId);
+                        }}
+                        disabled={locationMutation.isPending || vinMutation.isPending}
                         data-testid={`current-button-${vehicle.tokenId}`}
                         className="text-xs"
                       >
-                        {locationMutation.isPending ? (
+                        {(locationMutation.isPending || vinMutation.isPending) ? (
                           <>
                             <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                             Loading...
@@ -336,9 +382,9 @@ export default function UserVehicles() {
                         )}
                       </Button>
                     </div>
-                    {vehicleVins && (
+                    {vehicleVins[vehicle.tokenId] && (
                       <div className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-md font-mono">
-                        VIN: {vehicleVins}
+                        VIN: {vehicleVins[vehicle.tokenId]}
                       </div>
                     )}
                   </div>
