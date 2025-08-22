@@ -139,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Use the real DIMO service to get vehicle VIN
       const vinData = await dimoService.getVehicleVin(vehicleId, userToken);
-
+      console.log("Fetched VIN data:", vinData);      
       res.json({ vin: vinData });
     } catch (error) {
       console.error("Error fetching vehicle VIN:", error);
