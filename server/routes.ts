@@ -120,44 +120,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get real-time location data for a specific vehicle using DIMO data-sdk
-  app.get("/api/dimo/vehicles/:vehicleId/history", async (req, res) => {
-    try {
-      const { vehicleId } = req.params;
-      const authHeader = req.headers.authorization;
-
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res
-          .status(401)
-          .json({ message: "Missing or invalid authorization token" });
-        return;
-      }
-
-      const userToken = authHeader.substring(7);
-
-      console.log("Fetching weekly location for vehicle:", vehicleId);
-
-      // Use the real DIMO service to get vehicle location
-      const locationData = await dimoService.getVehicleWeeklyHistory(
-        vehicleId,
-        userToken,
-      );
-      console.log("Weekly location data:", locationData);
-      // Automatically save to GPS storage for visualization
-      const savedData = await storage.saveGpsData(locationData);
-
-      res.json(savedData);
-    } catch (error) {
-      console.error("Error fetching vehicle location:", error);
-      res.status(500).json({
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch vehicle location from DIMO",
-      });
-    }
-  });
-
   app.get("/api/dimo/vehicles/:vehicleId/data", async (req, res) => {
     try {
       const { vehicleId } = req.params;

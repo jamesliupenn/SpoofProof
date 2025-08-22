@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCachedDimoAuth } from "@/hooks/use-cached-auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -101,32 +101,12 @@ const fetchCurrentVehicleLocation = async (tokenId: number) => {
   return response.json();
 };
 
-const fetchCurrentVehicleHistory = async (tokenId: number) => {
-  // Get cached token from localStorage
-  const cachedToken = getCookieValue("dimo_auth_token");
-
-  if (!cachedToken) {
-    throw new Error("No cached DIMO token found. Please authenticate first.");
-  }
-
-  const response = await fetch(`/api/dimo/vehicles/${tokenId}/history`, {
-    headers: {
-      Authorization: `Bearer ${cachedToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
-  }
-
-  return response.json();
-};
-
 export default function UserVehicles() {
   const { isAuthenticated, walletAddress, email, isFromCache } =
     useCachedDimoAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [vehicleVins, setVehicleVins] = useState<Record<number, string>>({});
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/dimo/vehicles", walletAddress],
@@ -162,12 +142,18 @@ export default function UserVehicles() {
 
   const locationMutation = useMutation({
     mutationFn: fetchCurrentVehicleLocation,
-    onSuccess: (locationData) => {
+    onSuccess: (locationData, variables) => {
       if (locationData.lat && locationData.lng) {
         toast({
           title: "Location Updated",
           description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)} (HDOP: ${locationData.hdop})`,
         });
+        
+        // Store VIN data if available
+        if (locationData.vin && locationData.vin !== "Unknown") {
+          setVehicleVins(prev => ({ ...prev, [variables]: locationData.vin }));
+        }
+        
         // Invalidate GPS data to trigger a refresh of the map
         queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
 
@@ -202,46 +188,6 @@ export default function UserVehicles() {
           error instanceof Error
             ? error.message
             : "Failed to fetch vehicle location",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const historyMutation = useMutation({
-    mutationFn: fetchCurrentVehicleHistory,
-    onSuccess: (historyData) => {
-      console.log("Vehicle history data received:", historyData);
-      toast({
-        title: "Weekly History Loaded",
-        description: `Found ${historyData?.datapoints} historical data points`,
-      });
-
-      // Invalidate GPS data to trigger a refresh of the map
-      queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
-
-      // Notify parent component to focus on the new location and update GPS data
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("focusMapLocation", {
-            detail: {
-              lat: historyData.lat,
-              lng: historyData.lng,
-              hdop: historyData.hdop || 1.0,
-            },
-          }),
-        );
-
-        // Also dispatch event to clear user pins and restore GPS signals
-        window.dispatchEvent(new CustomEvent("clearUserPin"));
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "History Fetch Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch vehicle history",
         variant: "destructive",
       });
     },
@@ -346,7 +292,7 @@ export default function UserVehicles() {
                 data-testid={`vehicle-card-${vehicle.tokenId}`}
               >
                 <div className="flex justify-between items-start">
-                  <div>
+                  <div className="flex-1">
                     <h3
                       className="font-semibold text-lg"
                       data-testid={`vehicle-name-${vehicle.tokenId}`}
@@ -361,56 +307,40 @@ export default function UserVehicles() {
                       Token ID: {vehicle.tokenId}
                     </p>
                   </div>
-                  <Badge
-                    variant="secondary"
-                    data-testid={`vehicle-status-${vehicle.tokenId}`}
-                  >
-                    Shared
-                  </Badge>
-                </div>
-
-                <div className="mt-3 space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => locationMutation.mutate(vehicle.tokenId)}
-                      disabled={locationMutation.isPending}
-                      data-testid={`current-button-${vehicle.tokenId}`}
-                      className="text-xs"
-                    >
-                      {locationMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          <MapPin className="mr-1 h-3 w-3" />
-                          Current
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => historyMutation.mutate(vehicle.tokenId)}
-                      disabled={historyMutation.isPending}
-                      data-testid={`lastweek-button-${vehicle.tokenId}`}
-                      className="text-xs"
-                    >
-                      {historyMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          <Calendar className="mr-1 h-3 w-3" />
-                          Last Week Approximated
-                        </>
-                      )}
-                    </Button>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        data-testid={`vehicle-status-${vehicle.tokenId}`}
+                      >
+                        Shared
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => locationMutation.mutate(vehicle.tokenId)}
+                        disabled={locationMutation.isPending}
+                        data-testid={`current-button-${vehicle.tokenId}`}
+                        className="text-xs"
+                      >
+                        {locationMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin className="mr-1 h-3 w-3" />
+                            Validate Location & VIN
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    {vehicleVins[vehicle.tokenId] && (
+                      <div className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-md font-mono">
+                        VIN: {vehicleVins[vehicle.tokenId]}
+                      </div>
+                    )}
                   </div>
                 </div>
 
