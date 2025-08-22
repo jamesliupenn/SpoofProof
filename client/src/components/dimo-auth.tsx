@@ -111,7 +111,7 @@ export default function DimoAuth() {
       mode="redirect"
       permissionTemplateId={2}
       expirationDate={expirationDate}
-      unAuthenticatedLabel="Show My Vehicles"
+      unAuthenticatedLabel="Connect My Vehicles"
       authenticatedLabel="Manage My Vehicles"
       onSuccess={handleShareSuccess}
       onError={handleShareError}

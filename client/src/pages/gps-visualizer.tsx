@@ -84,18 +84,19 @@ export default function GpsVisualizer() {
                 />
               </div>
               <div>
-                <h1
-                  className="text-xl lg:text-2xl font-semibold text-foreground"
+                <h2
+                  className="text-l lg:text-l font-semibold text-foreground"
                   data-testid="title"
                 >
-                  <span className="hidden sm:inline">Developer Kit</span>
-                  <span className="sm:hidden">Dev Kit</span>
-                </h1>
+                  <span className="hidden sm:inline">
+                    Validate VIN with location for Gig Drivers
+                  </span>
+                  <span className="sm:hidden">VIN Validator</span>
+                </h2>
               </div>
             </div>
             <div className="flex items-center space-x-2 lg:space-x-4">
               <ThemeToggle />
-              <DimoAuth />
             </div>
           </div>
         </div>
@@ -103,26 +104,35 @@ export default function GpsVisualizer() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <GitHubButton
-          href="https://github.com/dimo-network/data-sdk"
-          data-color-scheme="no-preference: light; light: light; dark: dark;"
-          data-icon="octicon-star"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Star dimo-network/data-sdk on GitHub"
-        >
-          DIMO Data SDK
-        </GitHubButton>
-        <GitHubButton
-          href="https://github.com/dimo-network/login-with-dimo"
-          data-color-scheme="no-preference: light; light: light; dark: dark;"
-          data-icon="octicon-star"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Star dimo-network/login-with-dimo on GitHub"
-        >
-          Login with DIMO
-        </GitHubButton>
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-2">
+            <GitHubButton
+              href="https://github.com/dimo-network/data-sdk"
+              data-color-scheme="no-preference: light; light: light; dark: dark;"
+              data-icon="octicon-star"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Star dimo-network/data-sdk on GitHub"
+            >
+              DIMO Data SDK
+            </GitHubButton>
+            <GitHubButton
+              href="https://github.com/dimo-network/login-with-dimo"
+              data-color-scheme="no-preference: light; light: light; dark: dark;"
+              data-icon="octicon-star"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Star dimo-network/login-with-dimo on GitHub"
+            >
+              Login with DIMO
+            </GitHubButton>
+          </div>
+
+          <div className="pb-4">
+            <DimoAuth />
+          </div>
+        </div>
+
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-9rem)]">
           {/* Control Panel */}
           <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
