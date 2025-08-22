@@ -101,27 +101,6 @@ const fetchCurrentVehicleLocation = async (tokenId: number) => {
   return response.json();
 };
 
-const fetchCurrentVehicleHistory = async (tokenId: number) => {
-  // Get cached token from localStorage
-  const cachedToken = getCookieValue("dimo_auth_token");
-
-  if (!cachedToken) {
-    throw new Error("No cached DIMO token found. Please authenticate first.");
-  }
-
-  const response = await fetch(`/api/dimo/vehicles/${tokenId}/history`, {
-    headers: {
-      Authorization: `Bearer ${cachedToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch vehicle location: ${response.statusText}`);
-  }
-
-  return response.json();
-};
-
 export default function UserVehicles() {
   const { isAuthenticated, walletAddress, email, isFromCache } =
     useCachedDimoAuth();
@@ -202,46 +181,6 @@ export default function UserVehicles() {
           error instanceof Error
             ? error.message
             : "Failed to fetch vehicle location",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const historyMutation = useMutation({
-    mutationFn: fetchCurrentVehicleHistory,
-    onSuccess: (historyData) => {
-      console.log("Vehicle history data received:", historyData);
-      toast({
-        title: "Weekly History Loaded",
-        description: `Found ${historyData?.datapoints} historical data points`,
-      });
-
-      // Invalidate GPS data to trigger a refresh of the map
-      queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
-
-      // Notify parent component to focus on the new location and update GPS data
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("focusMapLocation", {
-            detail: {
-              lat: historyData.lat,
-              lng: historyData.lng,
-              hdop: historyData.hdop || 1.0,
-            },
-          }),
-        );
-
-        // Also dispatch event to clear user pins and restore GPS signals
-        window.dispatchEvent(new CustomEvent("clearUserPin"));
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "History Fetch Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch vehicle history",
         variant: "destructive",
       });
     },
@@ -387,27 +326,7 @@ export default function UserVehicles() {
                       ) : (
                         <>
                           <MapPin className="mr-1 h-3 w-3" />
-                          Current
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => historyMutation.mutate(vehicle.tokenId)}
-                      disabled={historyMutation.isPending}
-                      data-testid={`lastweek-button-${vehicle.tokenId}`}
-                      className="text-xs"
-                    >
-                      {historyMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          <Calendar className="mr-1 h-3 w-3" />
-                          Last Week Approximated
+                          Validate Location & VIN
                         </>
                       )}
                     </Button>
