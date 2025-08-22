@@ -1,4 +1,7 @@
 # DIMO Build Developer Kit
+![GitHub Repo stars](https://img.shields.io/github/stars/dimo-network/data-sdk?label=data-SDK)
+![GitHub Repo stars](https://img.shields.io/github/stars/dimo-network/login-with-dimo?label=LoginWithDIMO)
+
 
 ## Overview
 
