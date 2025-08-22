@@ -120,10 +120,7 @@ export class DimoService {
         query: query,
       });
 
-      // Get VIN data separately
-      const vehicleVin = await this.getVehicleVin(vehicleId, userToken);
-
-      console.log("DIMO Telemetry API response:", locationData, vehicleVin);
+      console.log("DIMO Telemetry API response:", locationData);
 
       const signalsData = locationData?.data?.signalsLatest;
       const latitude = signalsData?.currentLocationLatitude?.value;
@@ -140,7 +137,6 @@ export class DimoService {
         lng: parseFloat(longitude),
         hdop: hdop ? parseFloat(hdop) : 1.0,
         timestamp: signalsData?.lastSeen || new Date().toISOString(),
-        vin: vehicleVin || "Unknown",
       };
     } catch (error) {
       console.error("Error fetching DIMO vehicle location:", error);
