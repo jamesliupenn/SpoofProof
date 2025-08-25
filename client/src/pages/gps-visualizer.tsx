@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Info } from "lucide-react";
-import logoBlack from "@/assets/logo-black.png";
-import logoWhite from "@/assets/logo-white.png";
+import logoBlack from "@/assets/SpoofProof_Black.png";
+import logoWhite from "@/assets/SpoofProof_White.png";
 import GpsMap from "@/components/gps-map";
 import DimoAuth from "@/components/dimo-auth";
 import UserVehicles from "@/components/user-vehicles";
