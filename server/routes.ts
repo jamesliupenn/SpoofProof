@@ -95,15 +95,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const userToken = authHeader.substring(7);
 
       console.log("Fetching real-time location for vehicle:", vehicleId);
 
       // Use the real DIMO service to get vehicle location
-      const locationData = await dimoService.getVehicleLocation(
-        vehicleId,
-        userToken,
-      );
+      const locationData = await dimoService.getVehicleLocation(vehicleId);
 
       // Automatically save to GPS storage for visualization
       const savedData = await storage.saveGpsData(locationData);
@@ -139,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Use the real DIMO service to get vehicle VIN
       const vinData = await dimoService.getVehicleVin(vehicleId, userToken);
-
+      console.log("Fetched VIN data:", vinData);      
       res.json({ vin: vinData });
     } catch (error) {
       console.error("Error fetching vehicle VIN:", error);

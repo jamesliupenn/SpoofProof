@@ -159,7 +159,7 @@ export class DimoService {
 
       console.log("DIMO VIN API response:", vehicleVin);
 
-      return vehicleVin?.vin || "Unknown";
+      return vehicleVin || "Unknown";
     } catch (error) {
       console.error("Error fetching DIMO vehicle VIN:", error);
       throw error;
