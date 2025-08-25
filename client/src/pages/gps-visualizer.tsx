@@ -104,8 +104,16 @@ export default function GpsVisualizer() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex space-x-2">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          {/* DimoAuth - shows first on mobile, last on desktop */}
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+            <div className="lg:pb-4">
+              <DimoAuth />
+            </div>
+          </div>
+
+          {/* GitHub Buttons - shows second on mobile, first on desktop */}
+          <div className="order-2 lg:order-1 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-2 justify-center lg:justify-start items-center lg:items-start">
             <GitHubButton
               href="https://github.com/dimo-network/data-sdk"
               data-color-scheme="no-preference: light; light: light; dark: dark;"
@@ -127,19 +135,15 @@ export default function GpsVisualizer() {
               Login with DIMO
             </GitHubButton>
           </div>
-
-          <div className="pb-4">
-            <DimoAuth />
-          </div>
         </div>
 
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[calc(100vh-9rem)]">
-          {/* Control Panel */}
-          <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
-            <UserVehicles />
+          {/* Rest of your layout remains the same */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="lg:col-span-1 space-y-3 order-2 lg:order-1">
+              <UserVehicles />
+            </div>
           </div>
-
-          {/* Map Container */}
           <div className="lg:col-span-1 order-1 lg:order-2">
             <div className="bg-card rounded-xl shadow-sm border border-border h-[50vh] lg:h-full overflow-hidden">
               <div className="h-12 border-b border-border flex items-center justify-between px-4 lg:px-6">

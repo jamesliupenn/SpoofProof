@@ -67,24 +67,39 @@ export default function DimoAuth() {
 
   if (isAuthenticated) {
     return (
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-2 text-sm">
-          <User className="text-blue-600" size={16} />
-          <div className="hidden sm:block">
+      <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center space-x-2 text-sm min-w-0 flex-shrink">
+          <User className="text-blue-600 flex-shrink-0" size={16} />
+          <div className="hidden xs:block sm:block min-w-0">
             <div
-              className="font-medium text-slate-900"
+              className="font-medium text-slate-900 truncate max-w-[120px] sm:max-w-none"
               data-testid="user-email"
+              title={email || "DIMO User"}
             >
               {email || "DIMO User"}
             </div>
             {walletAddress && (
-              <div className="text-xs text-slate-500" data-testid="user-wallet">
-                {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
+              <div
+                className="text-xs text-slate-500 truncate"
+                data-testid="user-wallet"
+              >
+                <span className="hidden sm:inline">
+                  {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
+                </span>
+                <span className="sm:hidden">
+                  {`${walletAddress.slice(0, 4)}...${walletAddress.slice(-2)}`}
+                </span>
                 {isFromCache && (
-                  <span className="ml-1 text-orange-500">(cached)</span>
+                  <span className="ml-1 text-orange-500 hidden sm:inline">
+                    (cached)
+                  </span>
                 )}
               </div>
             )}
+          </div>
+          {/* Mobile-only user indicator */}
+          <div className="xs:hidden sm:hidden flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
         </div>
         <LogoutWithDimo
@@ -95,10 +110,10 @@ export default function DimoAuth() {
           <Button
             variant="outline"
             size="sm"
-            className="flex items-center space-x-1"
+            className="flex items-center space-x-1 px-2 sm:px-3 min-w-0"
             data-testid="button-logout"
           >
-            <LogOut size={14} />
+            <LogOut size={14} className="flex-shrink-0" />
             <span className="hidden sm:inline">Logout</span>
           </Button>
         </LogoutWithDimo>
@@ -111,7 +126,7 @@ export default function DimoAuth() {
       mode="redirect"
       permissionTemplateId={2}
       expirationDate={expirationDate}
-      unAuthenticatedLabel="Connect My Vehicles"
+      unAuthenticatedLabel="Show My Vehicles"
       authenticatedLabel="Manage My Vehicles"
       onSuccess={handleShareSuccess}
       onError={handleShareError}
@@ -119,12 +134,14 @@ export default function DimoAuth() {
       <Button
         variant="default"
         size="sm"
-        className="flex items-center space-x-2"
+        className="flex items-center space-x-2 px-3 py-2 text-sm sm:text-base min-w-0"
         data-testid="button-share-vehicles"
       >
-        <Car size={14} />
-        <span className="hidden sm:inline">Share Vehicles</span>
-        <span className="sm:hidden">Share</span>
+        <Car size={14} className="flex-shrink-0" />
+        <span className="hidden sm:inline whitespace-nowrap">
+          Share Vehicles
+        </span>
+        <span className="sm:hidden whitespace-nowrap">Share</span>
       </Button>
     </ShareVehiclesWithDimo>
   );
