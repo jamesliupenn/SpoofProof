@@ -19,6 +19,10 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AmazonLogo from "@/assets/Amazon.png";
+import TargetLogo from "@/assets/Target.png";
+import UberLogo from "@/assets/Uber.png";
+import WalmartLogo from "@/assets/Walmart.png";
 
 interface Vehicle {
   tokenId: number;
@@ -130,6 +134,7 @@ export default function UserVehicles() {
     vin: string;
     location: [number, number];
   } | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<string>("amazon");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/dimo/vehicles", walletAddress],
@@ -449,11 +454,78 @@ export default function UserVehicles() {
             <h3 className="text-lg font-semibold flex items-center gap-2">
               Validate
             </h3>
+            
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => setSelectedCompany("amazon")}
+                className={`p-2 rounded-lg border-2 transition-colors ${
+                  selectedCompany === "amazon"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                }`}
+                data-testid="company-button-amazon"
+              >
+                <img
+                  src={AmazonLogo}
+                  alt="Amazon"
+                  className="w-12 h-12 object-contain"
+                />
+              </button>
+              
+              <button
+                onClick={() => setSelectedCompany("target")}
+                className={`p-2 rounded-lg border-2 transition-colors ${
+                  selectedCompany === "target"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                }`}
+                data-testid="company-button-target"
+              >
+                <img
+                  src={TargetLogo}
+                  alt="Target"
+                  className="w-12 h-12 object-contain"
+                />
+              </button>
+              
+              <button
+                onClick={() => setSelectedCompany("uber")}
+                className={`p-2 rounded-lg border-2 transition-colors ${
+                  selectedCompany === "uber"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                }`}
+                data-testid="company-button-uber"
+              >
+                <img
+                  src={UberLogo}
+                  alt="Uber"
+                  className="w-12 h-12 object-contain"
+                />
+              </button>
+              
+              <button
+                onClick={() => setSelectedCompany("walmart")}
+                className={`p-2 rounded-lg border-2 transition-colors ${
+                  selectedCompany === "walmart"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                }`}
+                data-testid="company-button-walmart"
+              >
+                <img
+                  src={WalmartLogo}
+                  alt="Walmart"
+                  className="w-12 h-12 object-contain"
+                />
+              </button>
+            </div>
+            
             <div className="bg-muted/50 rounded-lg p-4">
               <pre className="text-sm font-mono whitespace-pre-wrap overflow-x-auto">
                 {JSON.stringify(
                   {
-                    url: "amazon.com/flex/api/v2/driver/validate",
+                    url: `${selectedCompany}.com/flex/api/v2/driver/validate`,
                     vin: lastValidation.vin,
                     location: lastValidation.location,
                   },
