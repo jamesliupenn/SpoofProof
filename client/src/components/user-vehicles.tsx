@@ -126,6 +126,10 @@ export default function UserVehicles() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [vehicleVins, setVehicleVins] = useState<Record<number, string>>({});
+  const [lastValidation, setLastValidation] = useState<{
+    vin: string;
+    location: [number, number];
+  } | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/dimo/vehicles", walletAddress],
@@ -167,6 +171,12 @@ export default function UserVehicles() {
           title: "Location Updated",
           description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)} (HDOP: ${locationData.hdop})`,
         });
+        
+        // Update last validation data with location
+        setLastValidation(prev => ({
+          vin: prev?.vin || "",
+          location: [locationData.lat, locationData.lng]
+        }));
         
         // Invalidate GPS data to trigger a refresh of the map
         queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
@@ -212,6 +222,13 @@ export default function UserVehicles() {
     onSuccess: (vinData, variables) => {
       if (vinData.vin && vinData.vin !== "Unknown") {
         setVehicleVins(prev => ({ ...prev, [variables]: vinData.vin }));
+        
+        // Update last validation data with VIN
+        setLastValidation(prev => ({
+          vin: vinData.vin,
+          location: prev?.location || [0, 0]
+        }));
+        
         toast({
           title: "VIN Retrieved",
           description: `Vehicle VIN: ${vinData.vin}`,
@@ -424,6 +441,27 @@ export default function UserVehicles() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        
+        {lastValidation && (
+          <div className="mt-6 space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              Validate
+            </h3>
+            <div className="bg-muted/50 rounded-lg p-4">
+              <pre className="text-sm font-mono whitespace-pre-wrap overflow-x-auto">
+                {JSON.stringify(
+                  {
+                    url: "amazon.com/flex/api/v2/driver/validate",
+                    vin: lastValidation.vin,
+                    location: lastValidation.location,
+                  },
+                  null,
+                  2
+                )}
+              </pre>
+            </div>
           </div>
         )}
       </CardContent>
