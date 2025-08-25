@@ -19,8 +19,10 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AmazonLogo from "@/assets/Amazon.png";
 import AmazonLogoWhite from "@/assets/Amazon-White.png";
 import TargetLogo from "@/assets/Target.png";
+import UberLogo from "@/assets/Uber.png";
 import UberLogoWhite from "@/assets/Uber-White.png";
 import WalmartLogo from "@/assets/Walmart.png";
 
@@ -468,9 +470,14 @@ export default function UserVehicles() {
                 data-testid="company-button-amazon"
               >
                 <img
+                  src={AmazonLogo}
+                  alt="Amazon"
+                  className="w-12 h-12 object-contain block dark:hidden"
+                />
+                <img
                   src={AmazonLogoWhite}
                   alt="Amazon"
-                  className="w-12 h-12 object-contain"
+                  className="w-12 h-12 object-contain hidden dark:block"
                 />
               </button>
 
@@ -500,9 +507,14 @@ export default function UserVehicles() {
                 data-testid="company-button-uber"
               >
                 <img
+                  src={UberLogo}
+                  alt="Uber"
+                  className="w-12 h-12 object-contain block dark:hidden"
+                />
+                <img
                   src={UberLogoWhite}
                   alt="Uber"
-                  className="w-12 h-12 object-contain"
+                  className="w-12 h-12 object-contain hidden dark:block"
                 />
               </button>
 
@@ -527,7 +539,7 @@ export default function UserVehicles() {
               <pre className="text-sm font-mono whitespace-pre-wrap overflow-x-auto">
                 {JSON.stringify(
                   {
-                    url: `${selectedCompany}.com/flex/api/v2/driver/validate`,
+                    url: `${selectedCompany}.com/api/v2/driver/validate`,
                     vin: lastValidation.vin,
                     location: lastValidation.location,
                   },
