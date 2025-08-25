@@ -19,9 +19,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import AmazonLogo from "@/assets/Amazon.png";
+import AmazonLogoWhite from "@/assets/Amazon-White.png";
 import TargetLogo from "@/assets/Target.png";
-import UberLogo from "@/assets/Uber.png";
+import UberLogoWhite from "@/assets/Uber-White.png";
 import WalmartLogo from "@/assets/Walmart.png";
 
 interface Vehicle {
@@ -176,13 +176,13 @@ export default function UserVehicles() {
           title: "Location Updated",
           description: `Vehicle location: ${locationData.lat.toFixed(4)}, ${locationData.lng.toFixed(4)} (HDOP: ${locationData.hdop})`,
         });
-        
+
         // Update last validation data with location
-        setLastValidation(prev => ({
+        setLastValidation((prev) => ({
           vin: prev?.vin || "",
-          location: [locationData.lat, locationData.lng]
+          location: [locationData.lat, locationData.lng],
         }));
-        
+
         // Invalidate GPS data to trigger a refresh of the map
         queryClient.invalidateQueries({ queryKey: ["/api/gps"] });
 
@@ -226,14 +226,14 @@ export default function UserVehicles() {
     mutationFn: fetchVehicleVin,
     onSuccess: (vinData, variables) => {
       if (vinData.vin && vinData.vin !== "Unknown") {
-        setVehicleVins(prev => ({ ...prev, [variables]: vinData.vin }));
-        
+        setVehicleVins((prev) => ({ ...prev, [variables]: vinData.vin }));
+
         // Update last validation data with VIN
-        setLastValidation(prev => ({
+        setLastValidation((prev) => ({
           vin: vinData.vin,
-          location: prev?.location || [0, 0]
+          location: prev?.location || [0, 0],
         }));
-        
+
         toast({
           title: "VIN Retrieved",
           description: `Vehicle VIN: ${vinData.vin}`,
@@ -387,11 +387,13 @@ export default function UserVehicles() {
                           locationMutation.mutate(vehicle.tokenId);
                           vinMutation.mutate(vehicle.tokenId);
                         }}
-                        disabled={locationMutation.isPending || vinMutation.isPending}
+                        disabled={
+                          locationMutation.isPending || vinMutation.isPending
+                        }
                         data-testid={`current-button-${vehicle.tokenId}`}
                         className="text-xs"
                       >
-                        {(locationMutation.isPending || vinMutation.isPending) ? (
+                        {locationMutation.isPending || vinMutation.isPending ? (
                           <>
                             <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                             Loading...
@@ -448,36 +450,36 @@ export default function UserVehicles() {
             ))}
           </div>
         )}
-        
+
         {lastValidation && (
           <div className="mt-6 space-y-3">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               Validate
             </h3>
-            
+
             <div className="flex gap-2 justify-center">
               <button
                 onClick={() => setSelectedCompany("amazon")}
                 className={`p-2 rounded-lg border-2 transition-colors ${
                   selectedCompany === "amazon"
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500"
                 }`}
                 data-testid="company-button-amazon"
               >
                 <img
-                  src={AmazonLogo}
+                  src={AmazonLogoWhite}
                   alt="Amazon"
                   className="w-12 h-12 object-contain"
                 />
               </button>
-              
+
               <button
                 onClick={() => setSelectedCompany("target")}
                 className={`p-2 rounded-lg border-2 transition-colors ${
                   selectedCompany === "target"
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500"
                 }`}
                 data-testid="company-button-target"
               >
@@ -487,29 +489,29 @@ export default function UserVehicles() {
                   className="w-12 h-12 object-contain"
                 />
               </button>
-              
+
               <button
                 onClick={() => setSelectedCompany("uber")}
                 className={`p-2 rounded-lg border-2 transition-colors ${
                   selectedCompany === "uber"
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500"
                 }`}
                 data-testid="company-button-uber"
               >
                 <img
-                  src={UberLogo}
+                  src={UberLogoWhite}
                   alt="Uber"
                   className="w-12 h-12 object-contain"
                 />
               </button>
-              
+
               <button
                 onClick={() => setSelectedCompany("walmart")}
                 className={`p-2 rounded-lg border-2 transition-colors ${
                   selectedCompany === "walmart"
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                    : "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500"
                 }`}
                 data-testid="company-button-walmart"
               >
@@ -520,7 +522,7 @@ export default function UserVehicles() {
                 />
               </button>
             </div>
-            
+
             <div className="bg-muted/50 rounded-lg p-4">
               <pre className="text-sm font-mono whitespace-pre-wrap overflow-x-auto">
                 {JSON.stringify(
@@ -530,7 +532,7 @@ export default function UserVehicles() {
                     location: lastValidation.location,
                   },
                   null,
-                  2
+                  2,
                 )}
               </pre>
             </div>
